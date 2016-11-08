@@ -1,33 +1,26 @@
 package com.dean.android.framework.convenientapplication.ui;
 
-import android.os.Bundle;
-import android.widget.Toast;
+import android.content.Intent;
 
-import com.dean.android.framework.convenientapplication.R;
-import com.dean.android.framework.convenientapplication.databinding.ActivityMainBinding;
-import com.dean.android.framework.convenient.activity.ConvenientActivity;
+import com.dean.android.framework.convenient.activity.ConvenientMainActivity;
+import com.dean.android.framework.convenient.version.VersionUpdate;
 import com.dean.android.framework.convenient.view.ContentView;
-import com.dean.android.framework.convenient.view.OnClick;
-import com.dean.android.framework.convenientapplication.bean.UserInfoBean;
+import com.dean.android.framework.convenientapplication.R;
 
+/**
+ * Created by Dean on 2016/11/8.
+ */
 @ContentView(R.layout.activity_main)
-public class MainActivity extends ConvenientActivity<ActivityMainBinding> {
-
-    private UserInfoBean userInfoBean;
+public class MainActivity extends ConvenientMainActivity {
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    protected void showUpdateDownload(VersionUpdate versionUpdate) {
 
-        userInfoBean = new UserInfoBean();
-        userInfoBean.setUserName("数据绑定UserName");
-
-        viewDataBinding.setUserInfo(userInfoBean);
     }
 
-    @OnClick(R.id.commitBtn)
-    private void commitClicked() {
-        Toast.makeText(MainActivity.this, userInfoBean.getUserName(), Toast.LENGTH_SHORT).show();
+    @Override
+    protected void closeMainToHomeActivity() {
+        startActivity(new Intent(this, DataBindingActivity.class));
+        this.finish();
     }
-
 }
