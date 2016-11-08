@@ -3,8 +3,8 @@ package com.dean.android.framework.convenientapplication.ui;
 import android.os.Bundle;
 import android.widget.Toast;
 
-import com.dean.android.famework.convenientapplication.R;
-import com.dean.android.famework.convenientapplication.databinding.ActivityMainBinding;
+import com.dean.android.framework.convenientapplication.R;
+import com.dean.android.framework.convenientapplication.databinding.ActivityMainBinding;
 import com.dean.android.framework.convenient.activity.ConvenientActivity;
 import com.dean.android.framework.convenient.view.ContentView;
 import com.dean.android.framework.convenient.view.OnClick;
