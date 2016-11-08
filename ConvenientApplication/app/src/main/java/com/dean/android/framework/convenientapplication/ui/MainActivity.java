@@ -15,7 +15,6 @@ public class MainActivity extends ConvenientMainActivity {
 
     @Override
     protected void showUpdateDownload(VersionUpdate versionUpdate) {
-
     }
 
     @Override

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.databinding.ViewDataBinding;
 import android.os.Handler;
 import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
@@ -20,7 +21,7 @@ import com.dean.android.framework.convenient.version.VersionUpdate;
  * <p>
  * Created by Dean on 16/5/24.
  */
-public abstract class ConvenientMainActivity extends ConvenientActivity {
+public abstract class ConvenientMainActivity<T extends ViewDataBinding> extends ConvenientActivity<T> {
 
     // 版本更新dialog
     private AlertDialog versionUpdateDialog;

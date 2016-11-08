@@ -1,6 +1,7 @@
 package com.dean.android.framework.convenient.activity;
 
 import android.content.Intent;
+import android.databinding.ViewDataBinding;
 
 import com.dean.android.framework.convenient.bitmap.util.BitmapUtil;
 
@@ -9,7 +10,7 @@ import com.dean.android.framework.convenient.bitmap.util.BitmapUtil;
  * <p/>
  * Created by Dean on 16/8/2.
  */
-public abstract class ConvenientCameraActivity extends ConvenientActivity {
+public abstract class ConvenientCameraActivity<T extends ViewDataBinding> extends ConvenientActivity<T> {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
