@@ -78,7 +78,6 @@ public class ConvenientActivity<T extends ViewDataBinding> extends AppCompatActi
             /** 如果申请权限被用户拒绝 **/
             if (permissionList.contains(permission) && !PermissionsUtil.requestPermissionsSuccess(grantResults))
                 Toast.makeText(ConvenientActivity.this, permission + " 权限未申请成功", Toast.LENGTH_LONG).show();
-
         }
     }
 
