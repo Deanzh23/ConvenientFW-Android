@@ -22,16 +22,15 @@ import com.amap.api.services.geocoder.RegeocodeQuery;
 import com.amap.api.services.geocoder.RegeocodeResult;
 import com.amap.api.services.poisearch.PoiResult;
 import com.amap.api.services.poisearch.PoiSearch;
+import com.dean.android.framework.convenient.activity.ConvenientActivity;
+import com.dean.android.framework.convenient.toast.ToastUtil;
+import com.dean.android.framework.convenient.util.SetUtil;
 import com.dean.android.fw.convenientui.gaodemap.listener.GaoDeClickListener;
 import com.dean.android.fw.convenientui.gaodemap.listener.GaoDeLocationListener;
 import com.dean.android.fw.convenientui.gaodemap.listener.GaoDeSearchListener;
 import com.dean.android.fw.convenientui.gaodemap.util.GaoDeMapLocationUtil;
 
 import java.util.List;
-
-import cn.com.dean.android.fw.convenientframework.activity.ConvenientActivity;
-import cn.com.dean.android.fw.convenientframework.toast.ToastUtil;
-import cn.com.dean.android.fw.convenientframework.util.SetUtil;
 
 /**
  * 高德地图Activity

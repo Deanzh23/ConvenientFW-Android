@@ -5,7 +5,7 @@
 
         <variable
             name="userInfo"
-            type="com.dean.android.famework.convenientapplication.bean.UserInfoBean"/>
+            type="com.dean.android.framework.convenientapplication.bean.UserInfoBean"/>
     </data>
 
     <RelativeLayout

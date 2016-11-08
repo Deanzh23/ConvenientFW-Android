@@ -6,6 +6,7 @@ import com.amap.api.maps2d.MapView;
 import com.amap.api.services.help.Inputtips;
 import com.amap.api.services.help.InputtipsQuery;
 import com.amap.api.services.help.Tip;
+import com.dean.android.framework.convenient.util.SetUtil;
 import com.dean.android.fw.convenientui.gaodemap.listener.GaoDeClickListener;
 import com.dean.android.fw.convenientui.gaodemap.listener.GaoDeInputQueryListener;
 import com.dean.android.fw.convenientui.gaodemap.listener.GaoDeLocationListener;
@@ -14,8 +15,6 @@ import com.dean.android.fw.convenientui.gaodemap.object.TipObject;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import cn.com.dean.android.fw.convenientframework.util.SetUtil;
 
 /**
  * 搜索结果 Activity

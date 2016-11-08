@@ -1,7 +1,9 @@
 package com.dean.android.fw.convenientui.gaodemap.ui.fragment;
 
+import android.app.Fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+
 import com.amap.api.location.AMapLocation;
 import com.amap.api.location.AMapLocationClient;
 import com.amap.api.location.AMapLocationClientOption;
@@ -12,14 +14,13 @@ import com.amap.api.maps2d.LocationSource;
 import com.amap.api.maps2d.MapView;
 import com.dean.android.fw.convenientui.gaodemap.listener.GaoDeLocationListener;
 import com.dean.android.fw.convenientui.gaodemap.util.GaoDeMapLocationUtil;
-import cn.com.dean.android.fw.convenientframework.fragment.ConvenientFragment;
 
 /**
  * 高德地图Fragment
  * <p>
  * Created by Dean on 16/8/26.
  */
-public abstract class GaoDeMapFragment extends ConvenientFragment implements LocationSource {
+public abstract class GaoDeMapFragment extends Fragment implements LocationSource {
 
     private MapView map2dView;
     private AMapLocationClient aMapLocationClient;
@@ -53,7 +54,6 @@ public abstract class GaoDeMapFragment extends ConvenientFragment implements Loc
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
 
         map2dView = setMap2dView();
         gaoDeLocationListener = setGaoDeLocationListener();
