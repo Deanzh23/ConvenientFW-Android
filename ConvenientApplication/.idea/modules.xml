@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/ConvenientApplication.iml" filepath="$PROJECT_DIR$/ConvenientApplication.iml" />
+      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/convenient/convenient.iml" filepath="$PROJECT_DIR$/convenient/convenient.iml" />
+      <module fileurl="file://$PROJECT_DIR$/convenientlibrary/convenientlibrary.iml" filepath="$PROJECT_DIR$/convenientlibrary/convenientlibrary.iml" />
+      <module fileurl="file://$PROJECT_DIR$/gaodemap/gaodemap.iml" filepath="$PROJECT_DIR$/gaodemap/gaodemap.iml" />
+      <module fileurl="file://$PROJECT_DIR$/gaodemaplibrary/gaodemaplibrary.iml" filepath="$PROJECT_DIR$/gaodemaplibrary/gaodemaplibrary.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ui/ui.iml" filepath="$PROJECT_DIR$/ui/ui.iml" />
+    </modules>
+  </component>
+</project>
