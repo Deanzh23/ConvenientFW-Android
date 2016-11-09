@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 超类Activity
+ * 架构超类Activity
  * <p>
  * 用于进行相关配置
  * <p>

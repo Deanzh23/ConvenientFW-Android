@@ -3,9 +3,12 @@ package com.dean.android.framework.convenient.view.util;
 import android.app.Activity;
 import android.databinding.DataBindingUtil;
 import android.databinding.ViewDataBinding;
+import android.support.v4.app.Fragment;
+import android.view.LayoutInflater;
 import android.view.View;
 
 import com.dean.android.framework.convenient.activity.ConvenientActivity;
+import com.dean.android.framework.convenient.fragment.ConvenientFragment;
 import com.dean.android.framework.convenient.view.ContentView;
 import com.dean.android.framework.convenient.view.OnClick;
 import com.dean.android.framework.convenient.view.ViewInject;
@@ -38,6 +41,20 @@ public class BindingViewController {
     }
 
     /**
+     * Fragment相关注入
+     *
+     * @param fragment
+     * @param viewDataBinding
+     * @param <T>
+     * @return
+     */
+    public static <T extends ViewDataBinding> T inject(ConvenientFragment fragment, T viewDataBinding) {
+        viewDataBinding = injectFragmentView(fragment, viewDataBinding);
+
+        return viewDataBinding;
+    }
+
+    /**
      * Activity注入ContentView
      *
      * @param activity
@@ -47,12 +64,34 @@ public class BindingViewController {
      */
     private static <T extends ViewDataBinding> T injectContentView(ConvenientActivity activity, T viewDataBinding) {
         Class<? extends Activity> activityClass = activity.getClass();
-        ContentView contentViewAnnotation = activityClass.getAnnotation(ContentView.class);
+        ContentView contentView = activityClass.getAnnotation(ContentView.class);
 
-        if (contentViewAnnotation != null) {
-            int resourcesId = contentViewAnnotation.value();
+        if (contentView != null) {
+            int resourcesId = contentView.value();
 
             viewDataBinding = DataBindingUtil.setContentView(activity, resourcesId);
+        }
+
+        return viewDataBinding;
+    }
+
+    /**
+     * Fragment注入ContentView
+     *
+     * @param fragment
+     * @param viewDataBinding
+     * @param <T>
+     * @return
+     */
+    private static <T extends ViewDataBinding> T injectFragmentView(ConvenientFragment fragment, T viewDataBinding) {
+        Class<? extends Fragment> fragmentClass = fragment.getClass();
+        ContentView contentView = fragmentClass.getAnnotation(ContentView.class);
+
+        if (contentView != null) {
+            int resourcesId = contentView.value();
+            View view = LayoutInflater.from(fragment.getActivity()).inflate(resourcesId, null);
+
+            viewDataBinding = DataBindingUtil.bind(view);
         }
 
         return viewDataBinding;
