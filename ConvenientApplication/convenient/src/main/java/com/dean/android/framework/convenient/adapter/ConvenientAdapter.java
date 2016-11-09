@@ -25,7 +25,7 @@ public abstract class ConvenientAdapter<T extends ViewDataBinding> extends BaseA
         }
 
         setItemView(viewDataBinding);
-        
+
         return viewDataBinding.getRoot();
     }
 
