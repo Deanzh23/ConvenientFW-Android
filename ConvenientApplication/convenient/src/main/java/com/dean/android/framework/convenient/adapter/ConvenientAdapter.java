@@ -24,8 +24,22 @@ public abstract class ConvenientAdapter<T extends ViewDataBinding> extends BaseA
             viewDataBinding = DataBindingUtil.inflate(LayoutInflater.from(viewGroup.getContext()), itemLayoutId, viewGroup, false);
         }
 
+        setItemView(viewDataBinding);
+        
         return viewDataBinding.getRoot();
     }
 
-    abstract public int setItemLayoutId();
+    /**
+     * 设置item项布局id
+     *
+     * @return
+     */
+    public abstract int setItemLayoutId();
+
+    /**
+     * 设置业务的具体Item数据和行为
+     *
+     * @param viewDataBinding
+     */
+    public abstract void setItemView(T viewDataBinding);
 }
