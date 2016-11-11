@@ -14,19 +14,23 @@ import android.widget.BaseAdapter;
  */
 public abstract class ConvenientAdapter<T extends ViewDataBinding> extends BaseAdapter {
 
-    protected T viewDataBinding;
-    protected int itemLayoutId;
+    private T viewDataBinding;
+    private int itemLayoutId;
 
     @Override
     public View getView(int i, View view, ViewGroup viewGroup) {
         if (view == null || viewDataBinding == null) {
             itemLayoutId = setItemLayoutId();
             viewDataBinding = DataBindingUtil.inflate(LayoutInflater.from(viewGroup.getContext()), itemLayoutId, viewGroup, false);
-        }
 
-        setItemView(viewDataBinding);
+            view = viewDataBinding.getRoot();
+            view.setTag(viewDataBinding);
+        } else
+            viewDataBinding = (T) view.getTag();
 
-        return viewDataBinding.getRoot();
+        setItemView(viewDataBinding, i);
+
+        return view;
     }
 
     /**
@@ -41,5 +45,5 @@ public abstract class ConvenientAdapter<T extends ViewDataBinding> extends BaseA
      *
      * @param viewDataBinding
      */
-    public abstract void setItemView(T viewDataBinding);
+    public abstract void setItemView(T viewDataBinding, int index);
 }
