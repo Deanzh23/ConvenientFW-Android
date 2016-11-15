@@ -1,8 +1,12 @@
 package com.dean.android.framework.convenient.network;
 
+import android.app.Activity;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+
+import com.dean.android.framework.convenient.terminal.ping.DefaultPing;
+import com.dean.android.framework.convenient.terminal.ping.listener.OnPingListener;
 
 /**
  * 网络相关 工具类
@@ -17,6 +21,18 @@ public class NetworkUtil {
     public static final int NETWORK_STATE_MOBILE = 0;
     // WIFI
     public static final int NETWORK_STATE_WIFI = 1;
+
+    /**
+     * 是否可以有效的访问公网（此方法隐藏式执行在一个Thread中）
+     *
+     * @param activity
+     * @param ip
+     * @param onPingListener
+     */
+    public static void isConnectionedToPublicNetwork(Activity activity, String ip, OnPingListener onPingListener) {
+        DefaultPing defaultPing = new DefaultPing(ip);
+        defaultPing.ping(activity, onPingListener);
+    }
 
     /**
      * 获取当前网络状态

@@ -13,6 +13,8 @@ public class ConvenientDemoApplication extends ConvenientApplication {
             Thread.sleep(3000);
         } catch (InterruptedException e) {
         }
+
+//        DatabaseUtil.init();
     }
 
     @Override
