@@ -8,6 +8,8 @@ import com.dean.android.framework.convenient.terminal.ping.listener.OnPingListen
 import java.io.IOException;
 
 /**
+ * 执行ping命令的线程
+ * <p>
  * Created by Dean on 2016/11/15.
  */
 public class PingThread extends Thread {
