@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/ConvenientApplication.iml" filepath="$PROJECT_DIR$/ConvenientApplication.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ConvenientApplication.iml" filepath="$PROJECT_DIR$/ConvenientApplication.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/convenient/convenient.iml" filepath="$PROJECT_DIR$/convenient/convenient.iml" />
       <module fileurl="file://$PROJECT_DIR$/convenientlibrary/convenientlibrary.iml" filepath="$PROJECT_DIR$/convenientlibrary/convenientlibrary.iml" />
