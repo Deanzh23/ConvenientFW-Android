@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="usb-android-24">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../../../../../InstallTools/android-sdk/add-ons/addon-google_apis-google-24/libs/usb.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

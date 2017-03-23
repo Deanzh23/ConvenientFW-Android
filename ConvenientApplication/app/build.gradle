@@ -1,7 +1,7 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 25
+    compileSdkVersion 'Google Inc.:Google APIs:24'
     buildToolsVersion "25.0.0"
     defaultConfig {
         applicationId "com.dean.android.famework.convenientapplication"
@@ -9,7 +9,8 @@ android {
         targetSdkVersion 25
         versionCode 1
         versionName "1.0"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+        multiDexEnabled true
     }
     buildTypes {
         release {
@@ -18,7 +19,7 @@ android {
         }
     }
 
-    dataBinding{
+    dataBinding {
         enabled true
     }
 }
@@ -28,4 +29,8 @@ dependencies {
     compile project(':convenient')
     compile project(':gaodemap')
     compile project(':ui')
+    compile project(':googlemap')
+    compile 'com.google.android.gms:play-services:10.0.0'
+    //noinspection GradleCompatible
+    compile 'com.android.support:multidex:1.0.0'
 }

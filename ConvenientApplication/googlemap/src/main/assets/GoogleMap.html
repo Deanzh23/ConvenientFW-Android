@@ -1,0 +1,102 @@
+<!-- 声明以 HTML5 形式声明应用 -->
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style type="text/css">
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        #map {
+            height: 100%;
+        }
+    </style>
+
+    <script type="text/javascript" src="js/jquery-3.1.1.min.js"></script>
+
+    <script type="text/javascript">
+        var map;
+        var myLocationMarker;
+
+        <!-- 在 div 中创建地图的 JavaScript 函数 -->
+        function initMap() {
+            map = new google.maps.Map(document.getElementById('map'), {
+                center: {lat: 41.8, lng: 123.38},
+                zoom: 6,
+                disableDoubleClickZoom: true
+            });
+
+            detectBrowser();
+        }
+
+        <!-- 为移动设备屏幕适配 -->
+        function detectBrowser() {
+            var useragent = navigator.userAgent;
+            var mapdiv = document.getElementById("map");
+
+            if (useragent.indexOf('iPhone') != -1 || useragent.indexOf('Android') != -1) {
+                mapdiv.style.width = '100%';
+                mapdiv.style.height = '100%';
+            } else {
+                mapdiv.style.width = '600px';
+                mapdiv.style.height = '800px';
+            }
+        }
+
+        <!-- 移动地图显示区域 -->
+        function moveTo(lat, lng) {
+            var latlng = new google.maps.LatLng(lat, lng);
+
+            map.setCenter(latlng);
+        }
+
+        <!-- 设置缩放 -->
+        function setZoom(zoom) {
+            map.setZoom(zoom);
+        }
+
+        /**
+         * 设置我的位置
+         * @param lat
+         * @param lng
+         * @param moveToMyLocation
+         */
+        function setMyLocationMarker(lat, lng, moveToMyLocation) {
+            var myLatLng = new google.maps.LatLng(lat, lng);
+
+            myLocationMarker = new google.maps.Marker({
+                animation: google.maps.Animation.DROP,
+                draggable: false,
+                position: myLatLng,
+                map: map,
+                title: '当前位置'
+            });
+
+            myLocationMarker.setMap(map);
+
+            if (moveToMyLocation)
+                moveTo(lat, lng);
+        }
+    </script>
+</head>
+
+
+<body>
+
+<!-- “map”的 div 元素来存放地图 -->
+<div id="map"></div>
+
+<!-- 使用 script 标记加载 Maps API JavaScript -->
+<!-- async 属性允许浏览器在 Maps API 加载的同时渲染网站的其余内容。当 API 就绪时，它将调用使用 callback 参数指定的函数，即 initMap函数。 -->
+<!-- Google Maps API 使用浏览器的首选语言设置显示文本信息，如果您想要更改 Maps API 以忽略浏览器的语言设置，并强制它以特定语言显示信息，则可在包含用于指定所用语言的
+    Maps API JavaScript 代码时，向 <script> 标记添加一个可选的 language 参数（例如：添加 &language=ja） -->
+<!-- Google Maps API 在中国境内的服务域名是 http://maps.google.cn。向中国用户提供内容时，请将 https://maps.googleapis.com 替换为 http://maps.google.cn。 -->
+<script async defer
+        src="http://maps.google.cn/maps/api/js?key=AIzaSyAc4c26m7KXKDdp1Vz0V4cqTyf9QxvnHKc&callback=initMap">
+</script>
+
+</body>
+</html>

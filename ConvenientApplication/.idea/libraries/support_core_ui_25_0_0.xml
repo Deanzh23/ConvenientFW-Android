@@ -1,15 +1,13 @@
 <component name="libraryTable">
   <library name="support-core-ui-25.0.0">
     <CLASSES>
-      <root url="file://$PROJECT_DIR$/app/build/intermediates/exploded-aar/com.android.support/support-core-ui/25.0.0/res" />
-      <root url="jar://$PROJECT_DIR$/app/build/intermediates/exploded-aar/com.android.support/support-core-ui/25.0.0/jars/libs/internal_impl-25.0.0.jar!/" />
-      <root url="jar://$PROJECT_DIR$/app/build/intermediates/exploded-aar/com.android.support/support-core-ui/25.0.0/jars/classes.jar!/" />
+      <root url="jar://$USER_HOME$/.android/build-cache/a2a36f4f996528bd7208c63c7610b882fb46ebae/output/jars/libs/internal_impl-25.0.0.jar!/" />
+      <root url="jar://$USER_HOME$/.android/build-cache/a2a36f4f996528bd7208c63c7610b882fb46ebae/output/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.android/build-cache/a2a36f4f996528bd7208c63c7610b882fb46ebae/output/res" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>
-      <root url="jar://$PROJECT_DIR$/../../../../../InstallTools/sdk/extras/android/m2repository/com/android/support/support-core-ui/25.0.0/support-core-ui-25.0.0-sources.jar!/" />
-      <root url="jar://$PROJECT_DIR$/../../../../../InstallTools/sdk/extras/android/m2repository/com/android/support/support-core-ui/25.0.0/support-core-ui-25.0.0-sources.jar!/" />
-      <root url="jar://$PROJECT_DIR$/../../../../../InstallTools/sdk/extras/android/m2repository/com/android/support/support-core-ui/25.0.0/support-core-ui-25.0.0-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../../../../InstallTools/android-sdk/extras/android/m2repository/com/android/support/support-core-ui/25.0.0/support-core-ui-25.0.0-sources.jar!/" />
     </SOURCES>
   </library>
 </component>
