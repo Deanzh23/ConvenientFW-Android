@@ -87,6 +87,9 @@ public class BindingViewController {
         Class<? extends Fragment> fragmentClass = fragment.getClass();
         ContentView contentView = fragmentClass.getAnnotation(ContentView.class);
 
+        if (contentView == null)
+            contentView = fragmentClass.getSuperclass().getAnnotation(ContentView.class);
+
         if (contentView != null) {
             int resourcesId = contentView.value();
             View view = LayoutInflater.from(fragment.getActivity()).inflate(resourcesId, null);

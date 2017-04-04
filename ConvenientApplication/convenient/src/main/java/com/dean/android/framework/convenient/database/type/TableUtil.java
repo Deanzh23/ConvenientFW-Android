@@ -10,6 +10,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -80,7 +81,10 @@ public class TableUtil {
             return (boolean) object ? 1 : 0;
         else if ("string".equals(typeName))
             return object == null ? null : "'" + object + "'";
-        else
+        else if ("date".equals(typeName)) {
+            Date date = (Date) object;
+            return date == null ? 0 : ((Date) object).getTime();
+        } else
             return object;
     }
 
@@ -135,11 +139,11 @@ public class TableUtil {
 
                     setMethod = ormClass.getDeclaredMethod(setMethodName, field.getType());
 
-                    String typeName = field.getType().getSimpleName();
+                    String typeName = field.getType().getSimpleName().toLowerCase();
 
-                    if ("boolean".equals(typeName)) {
+                    if ("boolean".equals(typeName))
                         setMethod.invoke(object, cursor.getInt(columnIndex) == 1);
-                    } else if ("int".equals(typeName))
+                    else if ("int".equals(typeName))
                         setMethod.invoke(object, cursor.getInt(columnIndex));
                     else if ("float".equals(typeName))
                         setMethod.invoke(object, cursor.getFloat(columnIndex));
@@ -147,6 +151,10 @@ public class TableUtil {
                         setMethod.invoke(object, cursor.getDouble(columnIndex));
                     else if ("String".equals(typeName))
                         setMethod.invoke(object, cursor.getString(columnIndex));
+                    else if ("long".equals(typeName))
+                        setMethod.invoke(object, cursor.getLong(columnIndex));
+                    else if ("date".equals(typeName))
+                        setMethod.invoke(object, new Date(cursor.getLong(columnIndex)));
 
                 } catch (NoSuchFieldException e) {
                     e.printStackTrace();
@@ -185,6 +193,8 @@ public class TableUtil {
             type = "DOUBLE";
         else if ("boolean".equals(typeName))
             type = "BOOLEAN";
+        else if ("date".equals(typeName))
+            type = "LONG";
 
         return type;
     }

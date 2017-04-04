@@ -12,6 +12,7 @@ public class Selector {
     private StringBuilder mSQLBuilder;
 
     public Selector() {
+        initSQLIfNotExists();
     }
 
     public Selector(String column, String symbol, Object value) {
@@ -24,7 +25,7 @@ public class Selector {
     }
 
     public Selector and(String column, String symbol, Object value) {
-        valueNullCheck("AND", column, symbol, value);
+        valueNullCheck(mSQLBuilder.length() <= 0 ? "" : "AND", column, symbol, value);
 
         return this;
     }

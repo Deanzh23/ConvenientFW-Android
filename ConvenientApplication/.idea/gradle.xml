@@ -6,6 +6,18 @@
         <option name="distributionType" value="DEFAULT_WRAPPED" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
         <option name="gradleHome" value="$APPLICATION_HOME_DIR$/gradle" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/app" />
+            <option value="$PROJECT_DIR$/convenient" />
+            <option value="$PROJECT_DIR$/convenientlibrary" />
+            <option value="$PROJECT_DIR$/gaodemap" />
+            <option value="$PROJECT_DIR$/gaodemaplibrary" />
+            <option value="$PROJECT_DIR$/googlemap" />
+            <option value="$PROJECT_DIR$/ui" />
+          </set>
+        </option>
         <option name="resolveModulePerSourceSet" value="false" />
       </GradleProjectSettings>
     </option>
