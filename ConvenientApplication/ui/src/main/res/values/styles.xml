@@ -7,4 +7,9 @@
         <item name="android:textSize">22sp</item>
     </style>
 
+    <style name="NavigationAnim">
+        <item name="android:windowEnterAnimation">@anim/anim_navigation_show</item>
+        <item name="android:windowExitAnimation">@anim/anim_navigation_close</item>
+    </style>
+
 </resources>

@@ -5,7 +5,6 @@ import android.content.Intent;
 import com.dean.android.framework.convenient.activity.ConvenientMainActivity;
 import com.dean.android.framework.convenient.version.VersionUpdate;
 import com.dean.android.framework.convenient.view.ContentView;
-import com.dean.android.framework.convenientapplication.ui.DemoGoogleMapHtmlActivity;
 
 /**
  * Created by Dean on 2016/11/8.
@@ -19,7 +18,7 @@ public class MainActivity extends ConvenientMainActivity {
 
     @Override
     protected void closeMainToHomeActivity() {
-        startActivity(new Intent(this, DemoGoogleMapHtmlActivity.class));
+        startActivity(new Intent(this, CalendarActivity.class));
         this.finish();
     }
 }

@@ -4,15 +4,15 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@android:color/background_light"
+        android:clipToPadding="true"
         android:fitsSystemWindows="true">
 
-        <FrameLayout
-            android:id="@+id/mapLayout"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
-
-        <com.dean.android.fw.convenient.ui.view.navigation.NavigationButton
+        <CalendarView
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:background="@android:color/holo_blue_dark"/>
+
     </RelativeLayout>
 </layout>

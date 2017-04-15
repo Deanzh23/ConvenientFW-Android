@@ -18,8 +18,12 @@
     <script type="text/javascript" src="js/jquery-3.1.1.min.js"></script>
 
     <script type="text/javascript">
+        // 地图对象
         var map;
+        // 我的位置标记对象
         var myLocationMarker;
+        // 路线规划对象集合
+        var routeMarkers;
 
         <!-- 在 div 中创建地图的 JavaScript 函数 -->
         function initMap() {
@@ -79,6 +83,100 @@
 
             if (moveToMyLocation)
                 moveTo(lat, lng);
+        }
+
+        /**
+         * 设置路线标记
+         * @param routes
+         */
+        function setRouteMarkers(routes) {
+            if (!routes)
+                return;
+
+            routeMarkers = [];
+            for (var index in routes) {
+                var route = routes[index];
+
+                var latlng = new google.maps.LatLng(route.latFrom, route.lngFrom);
+                var marker = new google.maps.Marker({
+                    position: latlng,
+                    url: '../image/ic_map_persion.png',
+                    map: map
+                });
+
+                routeMarkers.push(marker);
+            }
+
+            setViewPort(routeMarkers);
+        }
+
+        function setViewPort(markers) {
+            var bounds = new google.maps.LatLngBounds();
+
+            for (var index in markers) {
+                var marker = markers[index];
+
+                bounds.extend(marker.getPosition());
+            }
+
+            map.fitBounds(bounds);
+        }
+
+        /**
+         * 导航路线
+         * @param route 起始、终止坐标
+         * @param locations 途经的点坐标
+         */
+        function navigationRoute(route, locations) {
+            var directionsDisplay = new google.maps.DirectionsRenderer();
+            var directionsService = new google.maps.DirectionsService();
+            var waypoints = [];
+
+            <!-- 路线经过的坐标 -->
+//            if (locations) {
+//                for (var index in locations) {
+//                    var waypoint = {
+//                        location: new google.maps.LatLng(location[index].lat, location[index].lng),
+//                        stopover: false
+//                    };
+//
+//                    waypoints.push(waypoint);
+//                }
+//            }
+
+            var request = {
+                origin: new google.maps.LatLng(route.latFrom, route.lngFrom),
+                destination: new google.maps.LatLng(route.latTo, route.lngTo),
+                travelMode: 'DRIVING',
+                transitOptions: {
+                    modes: ['RAIL', 'SUBWAY']
+                },
+                provideRouteAlternatives: true,
+                waypoints: [
+                    {
+                        location: new google.maps.LatLng("34.730175", "135.502958"),
+                        stopover: false
+                    },
+                    {
+                        location: new google.maps.LatLng("35.167467", "136.884539"),
+                        stopover: false
+                    }
+                ]
+            }
+
+            directionsDisplay.setMap(map);
+
+            directionsService.route(request, function (response, status) {
+                if (status == google.maps.DirectionsStatus.OK) {
+                    window.JavaScriptInterface.toast("DirectionsStatus.OK");
+
+                    directionsDisplay.setDirections(response);
+
+                    window.JavaScriptInterface.log(response);
+                } else {
+                    window.JavaScriptInterface.toast("DirectionsStatus.ERROR");
+                }
+            });
         }
     </script>
 </head>

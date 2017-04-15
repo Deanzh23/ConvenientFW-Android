@@ -31,15 +31,12 @@ public class ElasticityLoadingView extends FrameLayout {
 
     private ScaleAnimation contractAnimation;
     private ScaleAnimation spreadAnimation;
-
     private ObjectAnimator upwardLeftRotationAnimation;
     private ObjectAnimator upwardRightRotationAnimation;
     private ObjectAnimator downwardObjectAnimation;
 
     private float imageViewY;
-
     private int graphIndex = -1;
-
     private boolean running = true;
 
     private Animator.AnimatorListener upwardAnimationListener = new Animator.AnimatorListener() {

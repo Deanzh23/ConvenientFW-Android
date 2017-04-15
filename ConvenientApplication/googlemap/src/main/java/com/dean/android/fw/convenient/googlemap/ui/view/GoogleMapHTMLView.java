@@ -9,12 +9,21 @@ import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.widget.Toast;
 
 import com.dean.android.framework.convenient.location.ConvenientLocationUtils;
+import com.dean.android.framework.convenient.toast.ToastUtil;
 import com.dean.android.fw.convenient.googlemap.listener.GoogleMapHtmlListener;
+import com.dean.android.fw.convenient.googlemap.model.LocationModel;
+import com.dean.android.fw.convenient.googlemap.model.RouteModel;
+import com.google.gson.Gson;
+
+import java.util.List;
 
 /**
  * 谷歌地图HTML控件
@@ -27,6 +36,10 @@ public class GoogleMapHTMLView extends WebView {
     private final String JAVASCRIPT_PREFIX = "javascript:";
 
     private Context context;
+    /**
+     * 规划路线集合
+     */
+    private List<RouteModel> routeModels;
 
     private GoogleMapHtmlListener googleMapHtmlListener;
 
@@ -55,6 +68,7 @@ public class GoogleMapHTMLView extends WebView {
 
         // 设置HTML文件路径
         this.loadUrl(HTML_FILE_PATH);
+        this.addJavascriptInterface(new JavaScriptInterface(), JavaScriptInterface.class.getSimpleName());
 
         location();
     }
@@ -136,6 +150,17 @@ public class GoogleMapHTMLView extends WebView {
     }
 
     class JavaScriptInterface {
+
+        @JavascriptInterface
+        public void toast(String message) {
+            ToastUtil.showToast(context, message, Toast.LENGTH_LONG);
+        }
+
+        @JavascriptInterface
+        public void log(Object object) {
+            Gson gson = new Gson();
+            Log.d(GoogleMapHTMLView.class.getSimpleName(), gson.toJson(object));
+        }
     }
 
     /**
@@ -158,10 +183,10 @@ public class GoogleMapHTMLView extends WebView {
                 handler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        setMyLocationMarker(String.valueOf(location.getLatitude()), String.valueOf(location.getLongitude()), true);
-                        setZoom(14);
+//                        setMyLocationMarker(String.valueOf(location.getLatitude()), String.valueOf(location.getLongitude()), true);
+//                        setZoom(14);
                     }
-                }, 3000);
+                }, 1000);
             }
 
             @Override
@@ -176,5 +201,17 @@ public class GoogleMapHTMLView extends WebView {
             public void onProviderDisabled(String provider) {
             }
         });
+    }
+
+    public void setRouteModels(List<RouteModel> routeModels) {
+        this.routeModels = routeModels;
+
+        Gson gson = new Gson();
+        executeJavaScript("setRouteMarkers(" + gson.toJson(routeModels) + ")");
+    }
+
+    public void navigationRoute(RouteModel routeModel, List<LocationModel> locationModels) {
+        Gson gson = new Gson();
+        executeJavaScript("navigationRoute(" + gson.toJson(routeModel) + "," + gson.toJson(locationModels) + ")");
     }
 }

@@ -149,7 +149,7 @@ public class TableUtil {
                         setMethod.invoke(object, cursor.getFloat(columnIndex));
                     else if ("double".equals(typeName))
                         setMethod.invoke(object, cursor.getDouble(columnIndex));
-                    else if ("String".equals(typeName))
+                    else if ("string".equals(typeName))
                         setMethod.invoke(object, cursor.getString(columnIndex));
                     else if ("long".equals(typeName))
                         setMethod.invoke(object, cursor.getLong(columnIndex));

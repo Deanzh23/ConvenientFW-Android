@@ -43,4 +43,18 @@ public class ScreenUtils {
 
         return windowManager.getDefaultDisplay();
     }
+
+    /**
+     * 获取指定dp相应的px值
+     *
+     * @param context
+     * @param dpValue
+     * @return
+     */
+    public static int dp2px(Context context, float dpValue) {
+        float scale = context.getResources().getDisplayMetrics().density;
+        return (int) (dpValue * scale + 0.5f);
+    }
+
+
 }
