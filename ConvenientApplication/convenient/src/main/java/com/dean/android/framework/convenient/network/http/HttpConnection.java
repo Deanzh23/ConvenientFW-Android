@@ -5,6 +5,9 @@ import android.util.Log;
 import com.dean.android.framework.convenient.network.http.listener.HttpConnectionListener;
 import com.dean.android.framework.convenient.util.SetUtil;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -167,17 +170,17 @@ public class HttpConnection {
 
             /** body **/
             if (!SetUtil.isEmpty(bodyParams)) {
-                String strBody = null;
+                JSONObject bodyJSONObject = new JSONObject();
 
                 for (Map.Entry<String, String> entry : bodyParams.entrySet()) {
                     String key = entry.getKey();
                     String value = entry.getValue();
 
-                    strBody = URLEncoder.encode(key, "utf-8") + "=" + URLEncoder.encode(value, "utf-8");
+                    bodyJSONObject.put(URLEncoder.encode(key, "utf-8"), URLEncoder.encode(value, "utf-8"));
                 }
 
                 OutputStream outputStream = connection.getOutputStream();
-                outputStream.write(strBody.getBytes());
+                outputStream.write(bodyJSONObject.toString().getBytes());
                 outputStream.flush();
                 outputStream.close();
             }
@@ -205,6 +208,8 @@ public class HttpConnection {
         } catch (MalformedURLException e) {
             httpConnectionListener.error(-1);
         } catch (IOException e) {
+            httpConnectionListener.error(-1);
+        } catch (JSONException e) {
             httpConnectionListener.error(-1);
         } finally {
             try {

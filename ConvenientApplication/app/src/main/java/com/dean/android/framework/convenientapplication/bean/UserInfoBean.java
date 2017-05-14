@@ -5,10 +5,12 @@ import android.databinding.Bindable;
 
 import com.android.databinding.library.baseAdapters.BR;
 
+import java.io.Serializable;
+
 /**
  * Created by Dean on 2016/11/7.
  */
-public class UserInfoBean extends BaseObservable {
+public class UserInfoBean extends BaseObservable implements Serializable {
 
     private String userId;
 

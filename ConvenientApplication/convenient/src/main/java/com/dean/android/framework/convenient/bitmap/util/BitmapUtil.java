@@ -6,6 +6,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.databinding.BindingAdapter;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
@@ -18,6 +19,7 @@ import android.widget.ImageView;
 import com.dean.android.framework.convenient.bitmap.cache.BitmapCache;
 import com.dean.android.framework.convenient.bitmap.listener.BitmapDownloadListener;
 import com.dean.android.framework.convenient.bitmap.listener.PictureWriteListener;
+import com.dean.android.framework.convenient.code.CodeUtils;
 import com.dean.android.framework.convenient.exception.FileException;
 import com.dean.android.framework.convenient.exception.HasNoPermissionException;
 import com.dean.android.framework.convenient.permission.util.PermissionsUtil;
@@ -56,6 +58,53 @@ public class BitmapUtil {
      * 打开系统相机的 onActivityResult requestCode
      */
     public static final int ACTION_OPEN_CAMERA = 1;
+
+    @BindingAdapter({"imageUrl", "path", "isBackground"})
+    public static void imageLoader(final ImageView imageView, final String url, final String path, final boolean isBackground) {
+        // 建立一个ImageView和url的绑定关系
+        imageView.setTag(url);
+
+        final Activity activity = (Activity) imageView.getContext();
+        final String filePath = Environment.getExternalStorageDirectory().getPath() + "/" + path;
+        final String fileName = CodeUtils.md5Encode(url) + ".png";
+
+        // 本地已下载过此图片，直接使用
+        if (hasBitmapBySDCard(filePath + "/" + fileName)) {
+            Log.d(BitmapUtil.class.getSimpleName(), "图片" + fileName + "已存在，直接使用");
+
+            setBitmap2View(activity, imageView, filePath + "/" + fileName, true, null, isBackground);
+        }
+        // 没下载过此图片，下载后使用
+        else {
+            Log.d(BitmapUtil.class.getSimpleName(), "图片" + fileName + "不存在，准备开始下载");
+
+            download(activity, url, filePath, fileName, new BitmapDownloadListener() {
+                @Override
+                public void start() {
+                    Log.d(BitmapUtil.class.getSimpleName(), "开始下载图片：" + fileName);
+                }
+
+                @Override
+                public void success() {
+                    Log.d(BitmapUtil.class.getSimpleName(), "图片下载成功：" + fileName);
+
+                    // 获取ImageView和url的绑定关系
+                    if (url != null && url.equals(imageView.getTag()))
+                        setBitmap2View(activity, imageView, filePath + "/" + fileName, true, null, isBackground);
+                }
+
+                @Override
+                public void error(String error) {
+                    Log.d(BitmapUtil.class.getSimpleName(), "图片下载失败：" + fileName);
+                }
+
+                @Override
+                public void progress(int current, int total) {
+                    Log.d(BitmapUtil.class.getSimpleName(), "图片下载进度：" + fileName + "-->" + total + "/" + current);
+                }
+            });
+        }
+    }
 
     /**
      * 打开系统相机

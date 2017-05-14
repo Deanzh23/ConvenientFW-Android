@@ -1,31 +1,53 @@
 package com.dean.android.fw.convenientui.gaodemap.ui.fragment;
 
-import android.app.Fragment;
+import android.content.Context;
+import android.databinding.ViewDataBinding;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 
 import com.amap.api.location.AMapLocation;
 import com.amap.api.location.AMapLocationClient;
 import com.amap.api.location.AMapLocationClientOption;
 import com.amap.api.location.AMapLocationListener;
 import com.amap.api.maps2d.AMap;
+import com.amap.api.maps2d.CameraUpdate;
 import com.amap.api.maps2d.CameraUpdateFactory;
 import com.amap.api.maps2d.LocationSource;
 import com.amap.api.maps2d.MapView;
+import com.amap.api.maps2d.UiSettings;
+import com.amap.api.maps2d.model.BitmapDescriptorFactory;
+import com.amap.api.maps2d.model.LatLng;
+import com.amap.api.maps2d.model.LatLngBounds;
+import com.amap.api.maps2d.model.Marker;
+import com.amap.api.maps2d.model.MarkerOptions;
+import com.dean.android.framework.convenient.fragment.ConvenientFragment;
+import com.dean.android.framework.convenient.screen.ScreenUtils;
+import com.dean.android.framework.convenient.util.SetUtil;
 import com.dean.android.fw.convenientui.gaodemap.listener.GaoDeLocationListener;
+import com.dean.android.fw.convenientui.gaodemap.listener.OnInfoWindowClickListener;
+import com.dean.android.fw.convenientui.gaodemap.listener.OnMarkerClickListener;
 import com.dean.android.fw.convenientui.gaodemap.util.GaoDeMapLocationUtil;
+
+import java.util.List;
 
 /**
  * 高德地图Fragment
  * <p>
  * Created by Dean on 16/8/26.
  */
-public abstract class GaoDeMapFragment extends Fragment implements LocationSource {
+public abstract class GaoDeMapFragment<T extends ViewDataBinding> extends ConvenientFragment<T> implements LocationSource, AMap.OnMarkerClickListener
+        , AMap.OnInfoWindowClickListener {
+
+    private Context context;
 
     private MapView map2dView;
     private AMapLocationClient aMapLocationClient;
     private GaoDeLocationListener gaoDeLocationListener;
     private LocationSource.OnLocationChangedListener onLocationChangedListener;
+    private OnMarkerClickListener onMarkerClickListener;
+    private OnInfoWindowClickListener onInfoWindowClickListener;
 
     private AMapLocationListener aMapLocationListener = new AMapLocationListener() {
         @Override
@@ -52,12 +74,20 @@ public abstract class GaoDeMapFragment extends Fragment implements LocationSourc
     };
 
     @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        this.context = context;
+    }
+
+    @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
         map2dView = setMap2dView();
-        gaoDeLocationListener = setGaoDeLocationListener();
+        if (map2dView != null)
+            map2dView.onCreate(savedInstanceState);
 
+        gaoDeLocationListener = setGaoDeLocationListener();
         setConfig();
     }
 
@@ -76,6 +106,10 @@ public abstract class GaoDeMapFragment extends Fragment implements LocationSourc
         // 配置基础地图和定位绑定
         if (map2dView != null) {
             AMap aMap = map2dView.getMap();
+
+            setZoomControlsEnabled(true);
+            setCompassEnabled(true);
+            setScaleControlsEnabled(true);
 
             aMap.setLocationSource(this);
             aMap.getUiSettings().setMyLocationButtonEnabled(true);
@@ -117,6 +151,157 @@ public abstract class GaoDeMapFragment extends Fragment implements LocationSourc
     }
 
     /**
+     * 设置标记
+     *
+     * @param latLngList
+     */
+    public void setMarkers(List<LatLng> latLngList, List<String> titleList, List<String> snippets, Integer iconId, List<? extends Object> objects) {
+        if (map2dView != null)
+            map2dView.getMap().clear();
+
+        if (SetUtil.isEmpty(latLngList))
+            return;
+
+        int size = latLngList.size();
+        for (int i = 0; i < size; i++) {
+            LatLng latLng = latLngList.get(i);
+            String title = null;
+            try {
+                title = titleList.get(i);
+            } catch (Exception e) {
+            }
+            String snippet = null;
+            try {
+                snippet = snippets.get(i);
+            } catch (Exception e) {
+            }
+
+            MarkerOptions markerOptions = new MarkerOptions();
+            // 经纬度
+            markerOptions.position(latLng);
+            // 标题
+            if (!TextUtils.isEmpty(snippet))
+                markerOptions.snippet(snippet);
+            if (!TextUtils.isEmpty(title))
+                markerOptions.title(title);
+            // 设置自定义Marker图标
+            if (iconId != null)
+                markerOptions.icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(getResources(), iconId)));
+            // 可否拖动
+            markerOptions.draggable(false);
+
+            // 加载到地图上
+            map2dView.getMap().addMarker(markerOptions);
+
+            // 设置关联
+            try {
+                map2dView.getMap().getMapScreenMarkers().get(i).setObject(objects.get(i));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        map2dView.getMap().setOnMarkerClickListener(this);
+        map2dView.getMap().setOnInfoWindowClickListener(this);
+    }
+
+    /**
+     * 设置最佳视角
+     *
+     * @param latLngList
+     */
+    public void setBestAngle(List<LatLng> latLngList) {
+        if (SetUtil.isEmpty(latLngList))
+            return;
+
+        LatLngBounds.Builder latLngBounds = new LatLngBounds.Builder();
+        for (LatLng latLng : latLngList)
+            latLngBounds.include(latLng);
+        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngBounds(latLngBounds.build(), ScreenUtils.dp2px(context, 24));
+
+        if (map2dView != null)
+            map2dView.getMap().animateCamera(cameraUpdate);
+    }
+
+    /**
+     * UI中的缩放按钮是否可见
+     *
+     * @param enabled
+     */
+    public void setZoomControlsEnabled(boolean enabled) {
+        UiSettings uiSettings = getMapUiSettings();
+        if (uiSettings != null)
+            uiSettings.setZoomControlsEnabled(enabled);
+    }
+
+    /**
+     * UI中的指南针是否可见
+     *
+     * @param enabled
+     */
+    public void setCompassEnabled(boolean enabled) {
+        UiSettings uiSettings = getMapUiSettings();
+        if (uiSettings != null)
+            uiSettings.setCompassEnabled(enabled);
+    }
+
+    /**
+     * UI中的比例尺是否可见
+     *
+     * @param enabled
+     */
+    public void setScaleControlsEnabled(boolean enabled) {
+        UiSettings uiSettings = getMapUiSettings();
+        if (uiSettings != null)
+            uiSettings.setScaleControlsEnabled(enabled);
+    }
+
+    /**
+     * 获取高德地图的UiSettings对象
+     *
+     * @return
+     */
+    private UiSettings getMapUiSettings() {
+        if (map2dView == null)
+            return null;
+
+        return map2dView.getMap().getUiSettings();
+    }
+
+    /**
+     * Marker点击事件
+     *
+     * @param marker
+     * @return
+     */
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        if (onMarkerClickListener != null && marker != null) {
+            if (marker.isInfoWindowShown())
+                marker.hideInfoWindow();
+            else
+                marker.showInfoWindow();
+
+            onMarkerClickListener.onMarkerClicked(marker.getObject());
+
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * InfoWindow点击事件
+     *
+     * @param marker
+     */
+    @Override
+    public void onInfoWindowClick(Marker marker) {
+        if (onInfoWindowClickListener != null && marker != null)
+            onInfoWindowClickListener.onInfoWindowClicked(marker.getObject());
+    }
+
+    /**
      * 设置高德地图MapView实例
      *
      * @return
@@ -129,6 +314,14 @@ public abstract class GaoDeMapFragment extends Fragment implements LocationSourc
      * @return
      */
     abstract protected GaoDeLocationListener setGaoDeLocationListener();
+
+    public void setOnMarkerClickListener(OnMarkerClickListener onMarkerClickListener) {
+        this.onMarkerClickListener = onMarkerClickListener;
+    }
+
+    public void setOnInfoWindowClickListener(OnInfoWindowClickListener onInfoWindowClickListener) {
+        this.onInfoWindowClickListener = onInfoWindowClickListener;
+    }
 
     @Override
     public void onPause() {

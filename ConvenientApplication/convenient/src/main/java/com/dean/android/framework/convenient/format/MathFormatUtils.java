@@ -10,7 +10,7 @@ import java.text.DecimalFormat;
  * 3.byte to M（保留1位小数）
  * Created by Dean on 16/5/12.
  */
-public class MathFormatUtil {
+public class MathFormatUtils {
 
     // 保留1位小数的format
     private static final DecimalFormat sDecimalFormat = new DecimalFormat("##0.0");

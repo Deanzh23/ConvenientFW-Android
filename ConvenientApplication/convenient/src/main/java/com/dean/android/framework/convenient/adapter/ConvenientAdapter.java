@@ -46,4 +46,5 @@ public abstract class ConvenientAdapter<T extends ViewDataBinding> extends BaseA
      * @param viewDataBinding
      */
     public abstract void setItemView(T viewDataBinding, int index);
+
 }

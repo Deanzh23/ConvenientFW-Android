@@ -31,7 +31,6 @@
 
         <activity android:name=".DemoGoogleMapActivity"/>
         <activity android:name=".ui.DemoGoogleMapHtmlActivity"/>
-        <activity android:name=".CalendarActivity"/>
 
     </application>
 
