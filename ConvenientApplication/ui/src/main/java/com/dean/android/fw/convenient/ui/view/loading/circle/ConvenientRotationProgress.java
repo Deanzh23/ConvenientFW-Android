@@ -15,7 +15,7 @@ import com.dean.android.fw.convenient.ui.R;
  *
  * @author Dean
  */
-public class RotationProgress extends View {
+public class ConvenientRotationProgress extends View {
 
     private int widthSize;
     private int heightSize;
@@ -27,12 +27,12 @@ public class RotationProgress extends View {
     private int rotate = 0;
     private boolean isRun = false;
 
-    public RotationProgress(Context context) {
+    public ConvenientRotationProgress(Context context) {
         super(context);
         init();
     }
 
-    public RotationProgress(Context context, AttributeSet attrs) {
+    public ConvenientRotationProgress(Context context, AttributeSet attrs) {
         super(context, attrs);
         init();
     }

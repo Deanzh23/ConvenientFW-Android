@@ -21,7 +21,7 @@ import com.dean.android.fw.convenient.ui.R;
  * <p/>
  * Created by Dean on 16/8/31.
  */
-public class ElasticityLoadingView extends FrameLayout {
+public class ConvenientElasticityLoadingView extends FrameLayout {
 
     public static int ANIMATION_DURATION = 500;
 
@@ -64,7 +64,7 @@ public class ElasticityLoadingView extends FrameLayout {
         }
     };
 
-    public ElasticityLoadingView(Context context, AttributeSet attrs) {
+    public ConvenientElasticityLoadingView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
         this.context = context;

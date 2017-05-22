@@ -84,7 +84,7 @@ public class VersionUpdate {
             onCheckVersionListener.onCheck(false);
         } else {
             DefaultHttpConnection defaultHttpConnection = new DefaultHttpConnection();
-            defaultHttpConnection.sendHttpGet(checkUpdateURL, null, new HttpConnectionListener() {
+            defaultHttpConnection.sendHttpGet(checkUpdateURL, null, null, new HttpConnectionListener() {
                 @Override
                 public void success(String response) {
                     try {
@@ -108,6 +108,10 @@ public class VersionUpdate {
                 @Override
                 public void error(int responseCode) {
                     onCheckVersionListener.onCheck(false);
+                }
+
+                @Override
+                public void end() {
                 }
             });
         }

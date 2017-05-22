@@ -4,7 +4,7 @@ import android.database.Cursor;
 import android.util.Log;
 
 import com.dean.android.framework.convenient.database.annotation.Table;
-import com.dean.android.framework.convenient.database.util.DatabaseUtil;
+import com.dean.android.framework.convenient.util.ObjectUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -119,7 +119,7 @@ public class TableUtil {
 
         while (cursor.moveToNext()) {
             /** 生成实例对象 **/
-            Object object = DatabaseUtil.instanceFromClass(ormClass);
+            Object object = ObjectUtils.instanceFromClass(ormClass);
 
             /** 遍历表结构，为实例对象注入对应的表字段值 **/
             for (String columnName : columnNames) {

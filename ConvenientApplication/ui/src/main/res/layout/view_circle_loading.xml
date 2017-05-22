@@ -4,7 +4,7 @@
                 android:layout_height="match_parent"
                 android:gravity="center">
 
-    <com.dean.android.fw.convenient.ui.view.loading.circle.RotationProgress
+    <com.dean.android.fw.convenient.ui.view.loading.circle.ConvenientRotationProgress
         android:id="@+id/rotationProgress"
         android:layout_width="40dp"
         android:layout_height="40dp"/>

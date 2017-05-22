@@ -1,16 +1,22 @@
 package com.dean.android.framework.convenient.json;
 
+import com.dean.android.framework.convenient.util.ObjectUtils;
+
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * JSON 工具类
  * <p>
  * 1.JsonObject 与 Object 相互转换
  * <p>
- * Created by Dean on 15/10/26.
+ * Created by Dean on 2016/12/5.
  */
 public class JSONUtil {
 
@@ -18,27 +24,52 @@ public class JSONUtil {
      * JSON 转 Object
      *
      * @param from
-     * @param to
+     * @param toClass
      */
-    public static void json2Object(JSONObject from, Object to) {
-        Class<? extends Object> toClz = to.getClass();
-        Field[] fields = toClz.getDeclaredFields();
+    public static <T> T json2Object(JSONObject from, Class<T> toClass) {
+        Field[] fields = toClass.getDeclaredFields();
 
         if (fields == null || fields.length == 0)
-            return;
+            return null;
 
         int injectCount = 0;
         for (Field field : fields) {
-            ValueInject valueInject = field.getAnnotation(ValueInject.class);
+            JSONInject valueInject = field.getAnnotation(JSONInject.class);
             if (valueInject != null)
                 injectCount++;
         }
 
         if (injectCount == 0)
-            json2Object_v1(from, to);
+            return json2Object_v1(from, toClass);
         else
-            json2Object_v2(from, to);
+            return json2Object_v2(from, toClass);
     }
+
+//    /**
+//     * JSON 转 Object
+//     *
+//     * @param from
+//     * @param to
+//     */
+//    public static void json2Object(JSONObject from, Object to) {
+//        Class<? extends Object> toClz = to.getClass();
+//        Field[] fields = toClz.getDeclaredFields();
+//
+//        if (fields == null || fields.length == 0)
+//            return;
+//
+//        int injectCount = 0;
+//        for (Field field : fields) {
+//            JSONInject valueInject = field.getAnnotation(JSONInject.class);
+//            if (valueInject != null)
+//                injectCount++;
+//        }
+//
+//        if (injectCount == 0)
+//            json2Object_v1(from, to);
+//        else
+//            json2Object_v2(from, to);
+//    }
 
     /**
      * object 转 json
@@ -47,7 +78,6 @@ public class JSONUtil {
      * @return
      */
     public static JSONObject object2Json(Object object) {
-        JSONObject json = new JSONObject();
         Class<? extends Object> ormClass = object.getClass();
 
         Field[] fields = ormClass.getDeclaredFields();
@@ -57,7 +87,7 @@ public class JSONUtil {
 
         int injectCount = 0;
         for (Field field : fields) {
-            ValueInject valueInject = field.getAnnotation(ValueInject.class);
+            JSONInject valueInject = field.getAnnotation(JSONInject.class);
 
             if (valueInject != null)
                 injectCount++;
@@ -110,7 +140,7 @@ public class JSONUtil {
         Field[] fields = ormClass.getDeclaredFields();
 
         for (Field field : fields) {
-            ValueInject valueInject = field.getAnnotation(ValueInject.class);
+            JSONInject valueInject = field.getAnnotation(JSONInject.class);
 
             if (valueInject == null)
                 continue;
@@ -139,111 +169,155 @@ public class JSONUtil {
      * json 2 object version1
      *
      * @param from
-     * @param to
+     * @param toClass
      */
-    private static void json2Object_v1(JSONObject from, Object to) {
-        Class<? extends Object> toClz = to.getClass();
-        Field[] fields = toClz.getDeclaredFields();
+    private static <T> T json2Object_v1(JSONObject from, Class<T> toClass) {
+        T object;
+
+        Field[] fields = toClass.getDeclaredFields();
 
         if (fields == null || fields.length == 0)
-            return;
+            return null;
+
+        object = (T) ObjectUtils.instanceFromClass(toClass);
 
         for (int i = 0; i < fields.length; i++) {
             String fieldName = fields[i].getName();
 
             Field toField;
             try {
-                toField = toClz.getDeclaredField(fieldName);
+                toField = toClass.getDeclaredField(fieldName);
 
                 if (fields[i].getType() == toField.getType()) {
                     String setMethodName = "set" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
-                    Method setMethod = toClz.getDeclaredMethod(setMethodName, fields[i].getType());
-
+                    Method setMethod = toClass.getDeclaredMethod(setMethodName, fields[i].getType());
                     String typeName = fields[i].getType().getSimpleName();
 
-                    // 字符串
-                    if (String.class.getSimpleName().equals(typeName)) {
-                        String strValue = from.getString(fieldName);
-                        setMethod.invoke(to, "null".equals(strValue) ? null : strValue);
-                    }
-                    // float
-                    else if (float.class.getSimpleName().equals(typeName)) {
-                        setMethod.invoke(to, (float) from.getDouble(fieldName));
-                    }
-                    // int
-                    else if (int.class.getSimpleName().equals(typeName)) {
-                        setMethod.invoke(to, from.getInt(fieldName));
-                    }
-                    // boolean
-                    else if (boolean.class.getSimpleName().equals(typeName)) {
-                        setMethod.invoke(to, from.getBoolean(fieldName));
-                    }
-                    // long
-                    else if (long.class.getSimpleName().equals(typeName)) {
-                        setMethod.invoke(to, from.getLong(fieldName));
-                    }
+                    invoke(from, object, fieldName, setMethod, typeName);
                 }
             } catch (Exception e) {
                 continue;
             }
         }
+
+        return object;
     }
 
     /**
      * json 2 object version2
      *
      * @param from
-     * @param to
+     * @param toClass
      */
-    private static void json2Object_v2(JSONObject from, Object to) {
-        Class<? extends Object> toClz = to.getClass();
-        Field[] fields = toClz.getDeclaredFields();
+    private static <T> T json2Object_v2(JSONObject from, Class<T> toClass) {
+        T object;
+
+        Field[] fields = toClass.getDeclaredFields();
 
         if (fields == null || fields.length == 0)
-            return;
+            return null;
+
+        object = (T) ObjectUtils.instanceFromClass(toClass);
 
         for (Field field : fields) {
-            ValueInject valueInject = field.getAnnotation(ValueInject.class);
+            JSONInject valueInject = field.getAnnotation(JSONInject.class);
 
             if (valueInject == null)
                 continue;
 
             try {
-                // Json的字段名
                 String jsonFieldName = valueInject.value();
-                // Object的字段名
                 String objectFieldName = field.getName();
 
                 /** 开始处理 **/
 
                 String setMethodName = "set" + objectFieldName.substring(0, 1).toUpperCase() + objectFieldName.substring(1);
-                Method setMethod = toClz.getDeclaredMethod(setMethodName, field.getType());
+                Method setMethod = toClass.getDeclaredMethod(setMethodName, field.getType());
                 String typeName = field.getType().getSimpleName();
 
-                // 字符串
-                if (String.class.getSimpleName().equals(typeName)) {
-                    String strValue = from.getString(jsonFieldName);
-                    setMethod.invoke(to, "null".equals(strValue) ? null : strValue);
-                }
-                // float
-                else if (float.class.getSimpleName().equals(typeName)) {
-                    setMethod.invoke(to, (float) from.getDouble(jsonFieldName));
-                }
-                // int
-                else if (int.class.getSimpleName().equals(typeName)) {
-                    setMethod.invoke(to, from.getInt(jsonFieldName));
-                }
-                // boolean
-                else if (boolean.class.getSimpleName().equals(typeName)) {
-                    setMethod.invoke(to, from.getBoolean(jsonFieldName));
-                }
-                // long
-                else if (long.class.getSimpleName().equals(typeName)) {
-                    setMethod.invoke(to, from.getLong(jsonFieldName));
-                }
+                invoke(from, object, jsonFieldName, setMethod, typeName);
             } catch (Exception e) {
                 continue;
             }
+        }
+
+        return object;
+    }
+
+    /**
+     * List 转 JSONArray
+     *
+     * @param objects
+     * @return
+     */
+    public synchronized static JSONArray list2JSONArray(List<? extends Object> objects) {
+        JSONArray jsonArray = new JSONArray();
+
+        if (objects != null && objects.size() > 0) {
+            for (Object object : objects)
+                jsonArray.put(object2Json(object));
+        }
+
+        return jsonArray;
+    }
+
+    /**
+     * JSONArray 转 List
+     *
+     * @param jsonArray
+     * @param <T>
+     * @return
+     */
+    public synchronized static <T> List<T> jsonArray2List(JSONArray jsonArray, Class<T> toClass) {
+        List<T> list = null;
+
+        if (jsonArray != null && jsonArray.length() > 0) {
+            list = new ArrayList<>();
+            int length = jsonArray.length();
+
+            for (int i = 0; i < length; i++) {
+                try {
+                    JSONObject json = jsonArray.getJSONObject(i);
+                    T object = json2Object(json, toClass);
+
+                    list.add(object);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    continue;
+                }
+
+            }
+        }
+
+        return list;
+    }
+
+    private static void invoke(JSONObject from, Object to, String fieldName, Method setMethod, String typeName) throws Exception {
+
+        // 字符串
+        if (String.class.getSimpleName().equals(typeName)) {
+            String strValue = from.getString(fieldName);
+            setMethod.invoke(to, "null".equals(strValue) ? null : strValue);
+        }
+        // float
+        else if (float.class.getSimpleName().equals(typeName) || Float.class.getSimpleName().equals(typeName)) {
+            setMethod.invoke(to, (float) from.getDouble(fieldName));
+        }
+        // double
+        else if (double.class.getSimpleName().equals(typeName) || Double.class.getSimpleName().equals(typeName)) {
+            setMethod.invoke(to, from.getDouble(fieldName));
+        }
+        // int
+        else if (int.class.getSimpleName().equals(typeName) || Integer.class.getSimpleName().equals(typeName)) {
+            setMethod.invoke(to, from.getInt(fieldName));
+        }
+        // long
+        else if (long.class.getSimpleName().equals(typeName) || Long.class.getSimpleName().equals(typeName)) {
+            setMethod.invoke(to, from.getLong(fieldName));
+        }
+        // boolean
+        else if (boolean.class.getSimpleName().equals(typeName) || Boolean.class.getSimpleName().equals(typeName)) {
+            setMethod.invoke(to, from.getBoolean(fieldName));
         }
     }
 

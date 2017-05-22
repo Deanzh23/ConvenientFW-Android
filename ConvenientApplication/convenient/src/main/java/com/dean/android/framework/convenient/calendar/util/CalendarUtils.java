@@ -132,4 +132,22 @@ public class CalendarUtils {
 
         return getCalendarItemsByDate(calendar.getTime());
     }
+
+    /**
+     * 获取指定日期 前／后 n天 的日期
+     *
+     * @param date
+     * @param simpleDateFormat
+     * @param difference
+     * @return
+     */
+    public static Date getDateFrontAndBackByDate(Date date, SimpleDateFormat simpleDateFormat, int difference) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+
+        calendar.add(Calendar.DAY_OF_MONTH, difference);
+
+        return calendar.getTime();
+    }
+
 }

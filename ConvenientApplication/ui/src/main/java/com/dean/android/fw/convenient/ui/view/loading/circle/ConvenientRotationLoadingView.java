@@ -12,14 +12,14 @@ import com.dean.android.fw.convenient.ui.R;
 /**
  * Created by Dean on 16/8/29.
  */
-public class RotationLoadingView extends FrameLayout {
+public class ConvenientRotationLoadingView extends FrameLayout {
 
     private Context context;
 
-    private RotationProgress rotationProgress;
+    private ConvenientRotationProgress convenientRotationProgress;
     private TextView textView;
 
-    public RotationLoadingView(Context context, AttributeSet attrs) {
+    public ConvenientRotationLoadingView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
         this.context = context;
@@ -28,7 +28,7 @@ public class RotationLoadingView extends FrameLayout {
 
     private void initView() {
         View layout = LayoutInflater.from(context).inflate(R.layout.view_circle_loading, null);
-        rotationProgress = (RotationProgress) layout.findViewById(R.id.rotationProgress);
+        convenientRotationProgress = (ConvenientRotationProgress) layout.findViewById(R.id.rotationProgress);
         textView = (TextView) layout.findViewById(R.id.textView);
         addView(layout);
     }
@@ -37,16 +37,16 @@ public class RotationLoadingView extends FrameLayout {
         if (view != null)
             view.setVisibility(View.GONE);
 
-        if (rotationProgress != null) {
-            rotationProgress.start();
+        if (convenientRotationProgress != null) {
+            convenientRotationProgress.start();
             this.setVisibility(View.VISIBLE);
         }
     }
 
     public void stop(View view) {
-        if (rotationProgress != null) {
+        if (convenientRotationProgress != null) {
             this.setVisibility(View.GONE);
-            rotationProgress.stop();
+            convenientRotationProgress.stop();
         }
 
         if (view != null)

@@ -21,4 +21,9 @@ public interface HttpConnectionListener {
      */
     void error(int responseCode);
 
+    /**
+     * 请求完成
+     */
+    void end();
+
 }
