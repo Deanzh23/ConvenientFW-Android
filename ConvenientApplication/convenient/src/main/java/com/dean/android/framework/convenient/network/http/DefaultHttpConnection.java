@@ -228,6 +228,7 @@ public class DefaultHttpConnection {
                                             Map<String, String> headerParams) throws ProtocolException {
         connection.setRequestMethod(requestMethod);
         connection.setRequestProperty("encoding", encoding);
+        connection.setRequestProperty("Content-Type", "application/json; charset=utf-8");
         connection.setConnectTimeout(timeOut);
         connection.setUseCaches(isUseCache);
 

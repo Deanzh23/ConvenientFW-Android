@@ -28,6 +28,8 @@ import com.dean.android.framework.convenient.util.SetUtil;
 import com.dean.android.fw.convenientui.gaodemap.listener.GaoDeLocationListener;
 import com.dean.android.fw.convenientui.gaodemap.listener.OnInfoWindowClickListener;
 import com.dean.android.fw.convenientui.gaodemap.listener.OnMarkerClickListener;
+import com.dean.android.fw.convenientui.gaodemap.object.GaoDeMapMarkerModel;
+import com.dean.android.fw.convenientui.gaodemap.ui.infowinadapter.InfoWinAdapter;
 import com.dean.android.fw.convenientui.gaodemap.util.GaoDeMapLocationUtil;
 
 import java.util.List;
@@ -37,17 +39,19 @@ import java.util.List;
  * <p>
  * Created by Dean on 16/8/26.
  */
-public abstract class GaoDeMapFragment<T extends ViewDataBinding> extends ConvenientFragment<T> implements LocationSource, AMap.OnMarkerClickListener
-        , AMap.OnInfoWindowClickListener {
+public abstract class GaoDeMapFragment<T extends ViewDataBinding> extends ConvenientFragment<T> implements LocationSource, AMap.OnMarkerClickListener {
 
     private Context context;
 
     private MapView map2dView;
+
     private AMapLocationClient aMapLocationClient;
+
+    private InfoWinAdapter infoWindowAdapter;
+
     private GaoDeLocationListener gaoDeLocationListener;
     private LocationSource.OnLocationChangedListener onLocationChangedListener;
     private OnMarkerClickListener onMarkerClickListener;
-    private OnInfoWindowClickListener onInfoWindowClickListener;
 
     private AMapLocationListener aMapLocationListener = new AMapLocationListener() {
         @Override
@@ -150,12 +154,16 @@ public abstract class GaoDeMapFragment<T extends ViewDataBinding> extends Conven
             aMapLocationClient.stopLocation();
     }
 
+    private List<? extends GaoDeMapMarkerModel> mapMarkerModels;
+
     /**
      * 设置标记
      *
      * @param latLngList
      */
-    public void setMarkers(List<LatLng> latLngList, List<String> titleList, List<String> snippets, Integer iconId, List<? extends Object> objects) {
+    public void setMarkers(List<LatLng> latLngList, List<String> titleList, List<String> snippets, Integer iconId, List<? extends GaoDeMapMarkerModel> objects) {
+        mapMarkerModels = objects;
+
         if (map2dView != null)
             map2dView.getMap().clear();
 
@@ -192,17 +200,9 @@ public abstract class GaoDeMapFragment<T extends ViewDataBinding> extends Conven
 
             // 加载到地图上
             map2dView.getMap().addMarker(markerOptions);
-
-            // 设置关联
-            try {
-                map2dView.getMap().getMapScreenMarkers().get(i).setObject(objects.get(i));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
         }
 
         map2dView.getMap().setOnMarkerClickListener(this);
-        map2dView.getMap().setOnInfoWindowClickListener(this);
     }
 
     /**
@@ -217,10 +217,21 @@ public abstract class GaoDeMapFragment<T extends ViewDataBinding> extends Conven
         LatLngBounds.Builder latLngBounds = new LatLngBounds.Builder();
         for (LatLng latLng : latLngList)
             latLngBounds.include(latLng);
-        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngBounds(latLngBounds.build(), ScreenUtils.dp2px(context, 24));
+        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngBounds(latLngBounds.build(), ScreenUtils.dp2px(context, 36));
 
         if (map2dView != null)
             map2dView.getMap().animateCamera(cameraUpdate);
+    }
+
+    /**
+     * 设置我的定位按钮是否可见
+     *
+     * @param enabled
+     */
+    public void setMyLocationButtonEnabled(boolean enabled) {
+        UiSettings uiSettings = getMapUiSettings();
+        if (uiSettings != null)
+            uiSettings.setMyLocationButtonEnabled(enabled);
     }
 
     /**
@@ -276,29 +287,33 @@ public abstract class GaoDeMapFragment<T extends ViewDataBinding> extends Conven
      */
     @Override
     public boolean onMarkerClick(Marker marker) {
-        if (onMarkerClickListener != null && marker != null) {
+        if (marker != null) {
             if (marker.isInfoWindowShown())
                 marker.hideInfoWindow();
             else
                 marker.showInfoWindow();
 
-            onMarkerClickListener.onMarkerClicked(marker.getObject());
+            if (onMarkerClickListener != null) {
+                if (!SetUtil.isEmpty(mapMarkerModels)) {
+                    LatLng markerLatLng = marker.getPosition();
 
-            return true;
+                    for (GaoDeMapMarkerModel mapMarkerModel : mapMarkerModels) {
+                        LatLng latLng = mapMarkerModel.getLatLng();
+
+                        try {
+                            if (latLng != null && markerLatLng.latitude == latLng.latitude && markerLatLng.longitude == latLng.longitude) {
+                                onMarkerClickListener.onMarkerClicked(mapMarkerModel);
+                                break;
+                            }
+                        } catch (Exception e) {
+                            continue;
+                        }
+                    }
+                }
+            }
         }
 
         return false;
-    }
-
-    /**
-     * InfoWindow点击事件
-     *
-     * @param marker
-     */
-    @Override
-    public void onInfoWindowClick(Marker marker) {
-        if (onInfoWindowClickListener != null && marker != null)
-            onInfoWindowClickListener.onInfoWindowClicked(marker.getObject());
     }
 
     /**
@@ -320,7 +335,8 @@ public abstract class GaoDeMapFragment<T extends ViewDataBinding> extends Conven
     }
 
     public void setOnInfoWindowClickListener(OnInfoWindowClickListener onInfoWindowClickListener) {
-        this.onInfoWindowClickListener = onInfoWindowClickListener;
+        infoWindowAdapter = new InfoWinAdapter(context, onInfoWindowClickListener);
+        map2dView.getMap().setInfoWindowAdapter(infoWindowAdapter);
     }
 
     @Override
