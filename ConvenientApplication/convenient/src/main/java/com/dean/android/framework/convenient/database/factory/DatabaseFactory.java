@@ -12,6 +12,7 @@ import com.dean.android.framework.convenient.database.annotation.PrimaryKey;
 import com.dean.android.framework.convenient.database.listener.DatabaseVersionUpdateListener;
 import com.dean.android.framework.convenient.database.type.TableUtil;
 import com.dean.android.framework.convenient.object.ObjectUtil;
+import com.dean.android.framework.convenient.util.ObjectUtils;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -216,18 +217,29 @@ public class DatabaseFactory {
         /** 表名 **/
         selectSQLBuilder.append(" " + TableUtil.getTableName(ormClass));
 
-        if (selector != null && selector.getSQLBuilder() != null) {
+        if (selector != null && selector.getSQL() != null) {
             selectSQLBuilder.append(" WHERE ");
-            selectSQLBuilder.append(selector.getSQLBuilder());
+            selectSQLBuilder.append(selector.getSQL());
         }
 
-        /** 查询 **/
-        Log.d(DatabaseFactory.class.getName(), selectSQLBuilder.toString());
-        Cursor cursor = sFrameworkDatabaseHelper.getReadableDatabase().rawQuery(selectSQLBuilder.toString(), null);
+        Cursor cursor;
+
+        try {
+            /** 查询 **/
+            Log.d(DatabaseFactory.class.getName(), selectSQLBuilder.toString());
+            cursor = sFrameworkDatabaseHelper.getReadableDatabase().rawQuery(selectSQLBuilder.toString(), null);
+        } catch (Exception e) {
+            // 修改表结构
+            editTableStructure(ObjectUtils.instanceFromClass(ormClass));
+            // 重新查询
+            Log.d(DatabaseFactory.class.getName(), selectSQLBuilder.toString());
+            cursor = sFrameworkDatabaseHelper.getReadableDatabase().rawQuery(selectSQLBuilder.toString(), null);
+        }
 
         /** 构造实例对象 **/
         List<T> dataList = TableUtil.generateOrmObject(ormClass, cursor);
         cursor.close();
+
 
         return dataList;
     }
@@ -362,14 +374,30 @@ public class DatabaseFactory {
         /** 表名 **/
         deleteSQLBuilder.append(" " + TableUtil.getTableName(ormClass));
 
-        if (selector != null && selector.getSQLBuilder() != null) {
+        if (selector != null && selector.getSQL() != null) {
             deleteSQLBuilder.append(" WHERE ");
-            deleteSQLBuilder.append(selector.getSQLBuilder());
+            deleteSQLBuilder.append(selector.getSQL());
         }
 
         /** 删除 **/
         Log.d(DatabaseFactory.class.getName(), deleteSQLBuilder.toString());
         sFrameworkDatabaseHelper.getWritableDatabase().execSQL(deleteSQLBuilder.toString());
+    }
+
+    /**
+     * 删除表
+     *
+     * @param ormClass
+     */
+    public void dropTable(Class ormClass) {
+        StringBuilder dropSQLBuilder = new StringBuilder();
+        dropSQLBuilder.append("DROP FROM");
+        // 表名
+        dropSQLBuilder.append(" " + TableUtil.getTableName(ormClass));
+
+        // 删除
+        Log.d(DatabaseFactory.class.getName(), dropSQLBuilder.toString());
+        sFrameworkDatabaseHelper.getWritableDatabase().execSQL(dropSQLBuilder.toString());
     }
 
     /**

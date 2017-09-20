@@ -1,5 +1,7 @@
 package com.dean.android.framework.convenientapplication;
 
+import android.os.Environment;
+
 import com.dean.android.framework.convenient.application.ConvenientApplication;
 
 /**
@@ -18,7 +20,12 @@ public class ConvenientDemoApplication extends ConvenientApplication {
     }
 
     @Override
+    protected String setVersionUpdateDownloadLocalPath() {
+        return Environment.getExternalStorageDirectory().getPath() + "/version/update/";
+    }
+
+    @Override
     protected String checkVersionUrl() {
-        return null;
+        return "http://124.95.128.250:909/api/sys/appversion/getappversion";
     }
 }

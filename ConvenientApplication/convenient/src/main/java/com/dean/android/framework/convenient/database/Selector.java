@@ -88,7 +88,7 @@ public class Selector {
      */
     public Selector andWhere(Selector selector) {
         mSQLBuilder.append(" AND ( ");
-        mSQLBuilder.append(selector.getSQLBuilder().toString());
+        mSQLBuilder.append(selector.getSQL());
         mSQLBuilder.append(" ) ");
 
         return this;
@@ -101,7 +101,7 @@ public class Selector {
      */
     public Selector orWhere(Selector selector) {
         mSQLBuilder.append(" OR ( ");
-        mSQLBuilder.append(selector.getSQLBuilder().toString());
+        mSQLBuilder.append(selector.getSQL());
         mSQLBuilder.append(" ) ");
 
         return this;
@@ -117,8 +117,8 @@ public class Selector {
      *
      * @return
      */
-    public StringBuilder getSQLBuilder() {
-        return mSQLBuilder;
+    public String getSQL() {
+        return mSQLBuilder == null ? null : mSQLBuilder.toString();
     }
 
     private void valueNullCheck(String link, String column, String symbol, Object value) {

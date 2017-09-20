@@ -81,7 +81,7 @@ public class VersionUpdate {
     public void checkUpdate(final OnCheckVersionListener onCheckVersionListener) {
         // 没有网络
         if (NetworkUtil.getNetworkState(context) == null || TextUtils.isEmpty(checkUpdateURL)) {
-            onCheckVersionListener.onCheck(false);
+            onCheckVersionListener.onCheck(false, null);
         } else {
             DefaultHttpConnection defaultHttpConnection = new DefaultHttpConnection();
             defaultHttpConnection.sendHttpGet(checkUpdateURL, null, null, new HttpConnectionListener() {
@@ -96,18 +96,18 @@ public class VersionUpdate {
                             isForceUpdate = json.getBoolean("forceUpdate");
                             updateMessage = json.getString("updateMessage");
 
-                            onCheckVersionListener.onCheck(true);
+                            onCheckVersionListener.onCheck(true, json);
                         } else
-                            onCheckVersionListener.onCheck(false);
+                            onCheckVersionListener.onCheck(false, null);
                     } catch (JSONException e) {
                         Log.e(VersionUpdate.class.getSimpleName(), e.getMessage());
-                        onCheckVersionListener.onCheck(false);
+                        onCheckVersionListener.onCheck(false, null);
                     }
                 }
 
                 @Override
                 public void error(int responseCode) {
-                    onCheckVersionListener.onCheck(false);
+                    onCheckVersionListener.onCheck(false, null);
                 }
 
                 @Override

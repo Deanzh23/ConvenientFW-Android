@@ -1,6 +1,7 @@
 package com.dean.android.framework.convenient.file.download;
 
 import android.app.Activity;
+import android.os.Handler;
 
 import com.dean.android.framework.convenient.file.download.listener.FileDownloadListener;
 
@@ -26,12 +27,23 @@ public class FileDownloadRunnable implements Runnable {
 
     protected FileDownloadListener fileDownloadListener;
 
-    public FileDownloadRunnable(Activity activity, String strUrl, String localPath, String name, FileDownloadListener fileDownloadListener) {
-        this.activity = activity;
+    protected Handler handler;
+
+    public FileDownloadRunnable(String strUrl, String localPath, String name, FileDownloadListener fileDownloadListener) {
         this.strUrl = strUrl;
         this.localPath = localPath;
         this.name = name;
         this.fileDownloadListener = fileDownloadListener;
+    }
+
+    public FileDownloadRunnable(Activity activity, String strUrl, String localPath, String name, FileDownloadListener fileDownloadListener) {
+        this(strUrl, localPath, name, fileDownloadListener);
+        this.activity = activity;
+    }
+
+    public FileDownloadRunnable(Handler handler, String strUrl, String localPath, String name, FileDownloadListener fileDownloadListener) {
+        this(strUrl, localPath, name, fileDownloadListener);
+        this.handler = handler;
     }
 
     /**
@@ -44,7 +56,7 @@ public class FileDownloadRunnable implements Runnable {
             return;
 
         /** 连接时长 1分钟 **/
-        httpURLConnection.setConnectTimeout(1000 * 60);
+        httpURLConnection.setConnectTimeout(2000 * 60);
         /** 其它配置信息 **/
         httpURLConnection.setRequestProperty("Accept-Language", "zh-CH");
         httpURLConnection.setRequestProperty("Charset", "UTF-8");
@@ -52,12 +64,20 @@ public class FileDownloadRunnable implements Runnable {
     }
 
     private void throwErrorToUiThread(final String error) {
-        activity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                fileDownloadListener.error(error);
-            }
-        });
+        if (activity != null)
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    fileDownloadListener.error(error);
+                }
+            });
+        else if (handler != null)
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    fileDownloadListener.error(error);
+                }
+            });
     }
 
     @Override
@@ -77,12 +97,20 @@ public class FileDownloadRunnable implements Runnable {
             /** 输入流转输出流 写入文件 **/
             writeToFile(inputStream, fileSize);
 
-            activity.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    fileDownloadListener.success();
-                }
-            });
+            if (activity != null)
+                activity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        fileDownloadListener.success();
+                    }
+                });
+            else if (handler != null)
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        fileDownloadListener.success();
+                    }
+                });
         } catch (final MalformedURLException e) {
             throwErrorToUiThread(e.getMessage());
         } catch (IOException e) {
@@ -127,12 +155,20 @@ public class FileDownloadRunnable implements Runnable {
             fileOutputStream.write(date, 0, len);
 
             final int finalLen = len;
-            activity.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    fileDownloadListener.progress(lenCount[0] += finalLen, fileSize);
-                }
-            });
+            if (activity != null)
+                activity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        fileDownloadListener.progress(lenCount[0] += finalLen, fileSize);
+                    }
+                });
+            else if (handler != null)
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        fileDownloadListener.progress(lenCount[0] += finalLen, fileSize);
+                    }
+                });
         }
 
         try {

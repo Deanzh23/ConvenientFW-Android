@@ -1,7 +1,11 @@
 package com.dean.android.framework.convenient.file.util;
 
 import android.os.Environment;
+import android.os.Handler;
 import android.text.TextUtils;
+
+import com.dean.android.framework.convenient.file.download.FileDownloadRunnable;
+import com.dean.android.framework.convenient.file.download.listener.FileDownloadListener;
 
 import java.io.File;
 import java.io.IOException;
@@ -44,6 +48,20 @@ public class FileUitl {
         File file = new File(path);
         if (!file.exists())
             file.createNewFile();
+    }
+
+    /**
+     * 下载文件
+     *
+     * @param handler
+     * @param url
+     * @param localPath
+     * @param fileName
+     * @param fileDownloadListener
+     */
+    public synchronized static void download(Handler handler, String url, String localPath, String fileName, FileDownloadListener fileDownloadListener) {
+        FileDownloadRunnable fileDownloadRunnable = new FileDownloadRunnable(handler, url, localPath, fileName, fileDownloadListener);
+        new Thread(fileDownloadRunnable).start();
     }
 
     /**

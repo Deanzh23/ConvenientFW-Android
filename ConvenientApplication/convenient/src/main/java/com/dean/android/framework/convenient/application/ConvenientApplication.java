@@ -2,14 +2,25 @@ package com.dean.android.framework.convenient.application;
 
 import android.app.Activity;
 import android.app.Application;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
+import android.os.Handler;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
+import com.dean.android.framework.convenient.file.download.listener.FileDownloadListener;
+import com.dean.android.framework.convenient.file.util.FileUitl;
+import com.dean.android.framework.convenient.toast.ToastUtil;
 import com.dean.android.framework.convenient.util.SetUtil;
 import com.dean.android.framework.convenient.version.VersionUpdate;
 import com.dean.android.framework.convenient.version.listener.OnCheckVersionListener;
 
+import org.json.JSONObject;
+
+import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +41,7 @@ public abstract class ConvenientApplication extends Application {
     private static Map<String, Object> mHistoryActivityMap = new HashMap<>();
     // 版本更新类
     private static VersionUpdate versionUpdate;
+    private static String versionUpdateDownloadLocalPath;
 
     @Override
     public void onCreate() {
@@ -53,13 +65,77 @@ public abstract class ConvenientApplication extends Application {
 
                 versionUpdate.checkUpdate(new OnCheckVersionListener() {
                     @Override
-                    public void onCheck(boolean hasVersionUpdate) {
-                        /** 设置app初始化完成 **/
+                    public void onCheck(boolean hasVersionUpdate, final JSONObject updateInfo) {
+                        if (!hasVersionUpdate || updateInfo == null)
+                            // 如果没有新版本更新，设置app初始化完成
+                            appInitFinish();
+                        else
+                            // 显示版本更新提示框
+                            versionUpdateDownloadLocalPath = setVersionUpdateDownloadLocalPath();
+
                         appInitFinish();
                     }
                 });
             }
         }).start();
+    }
+
+    /**
+     * 开始下载新版本apk
+     *
+     * @param context
+     * @param handler
+     * @param apkDownloadUrl
+     */
+    public static void startDownloadNewVersionAPK(final Context context, Handler handler, String apkDownloadUrl) {
+        final String fileName = "update.apk";
+
+        FileUitl.download(handler, apkDownloadUrl, versionUpdateDownloadLocalPath, fileName, new FileDownloadListener() {
+            @Override
+            public void start() {
+                ToastUtil.showToast(context, "开始下载升级文件");
+            }
+
+            @Override
+            public void success() {
+                ToastUtil.showToast(context, "下载成功");
+                installLocalAPK(context, versionUpdateDownloadLocalPath + "/" + fileName);
+            }
+
+            @Override
+            public void error(String error) {
+                AlertDialog.Builder errorBuilder = new AlertDialog.Builder(context);
+                errorBuilder.setMessage("升级文件下载错误");
+                errorBuilder.setNegativeButton("退出应用", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        System.exit(0);
+                    }
+                });
+
+                errorBuilder.setCancelable(false);
+                errorBuilder.create().show();
+            }
+
+            @Override
+            public void progress(int current, int total) {
+                ToastUtil.showToast(context, "下载进度: " + current + " / " + total);
+            }
+        });
+    }
+
+    /**
+     * 安装本地apk
+     *
+     * @param context
+     * @param filePath
+     */
+    public static void installLocalAPK(Context context, String filePath) {
+        Intent intent = new Intent();
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.setAction(android.content.Intent.ACTION_VIEW);
+        intent.setDataAndType(Uri.fromFile(new File(filePath)), "application/vnd.android.package-archive");
+        context.startActivity(intent);
     }
 
     /**
@@ -139,6 +215,13 @@ public abstract class ConvenientApplication extends Application {
      * 开发人员根据业务自己实现初始化加载的配置和数据
      */
     protected abstract void initConfigAndData();
+
+    /**
+     * apk升级文件下载到本地后的存放路径
+     *
+     * @return
+     */
+    protected abstract String setVersionUpdateDownloadLocalPath();
 
     /**
      * 配置apk检查更新的url

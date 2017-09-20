@@ -2,6 +2,8 @@ package com.dean.android.framework.convenient.calendar.util;
 
 import android.util.Log;
 
+import com.dean.android.framework.convenient.calendar.model.CalendarDayModel;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -88,32 +90,40 @@ public class CalendarUtils {
      * @param date
      * @return
      */
-    public static List<Object> getCalendarItemsByDate(Date date) {
-        List<Object> monthCalendarItems = new ArrayList<>();
-        String[] monthPlanArray = null;
-//        if (personShiftVO != null && !TextUtils.isEmpty(personShiftVO.getMonthPlan()))
-//            monthPlanArray = personShiftVO.getMonthPlan().split(",");
+    public static List<CalendarDayModel> getCalendarItemsByDate(Date date, SimpleDateFormat simpleDateFormat) {
+        List<CalendarDayModel> monthCalendarItems = new ArrayList<>();
 
         int week = getFirstDayForMonthOnWeek(date);
-
         int dayCount = getDayCountOfMonth(date);
-        for (int i = 1, j = 1; i <= dayCount; i++, j++) {
+
+        for (int i = 1; i <= dayCount; i++) {
             // 本月第一天是周几（占位）
-            if (j < week) {
-                monthCalendarItems.add(null);
-                i--;
-                continue;
+            if (week != 7) {
+                List<CalendarDayModel> tempCalendarDayModels = new ArrayList<>();
+
+                for (int j = 1; j < week; j++) {
+                    Date tempDate = getDateFrontAndBackByDate(date, simpleDateFormat, j);
+                    CalendarDayModel nominalCalendarDayModel = new CalendarDayModel();
+                    nominalCalendarDayModel.setDate(tempDate);
+                    nominalCalendarDayModel.setDay(tempDate.getDay());
+                    nominalCalendarDayModel.setNominalDate(true);
+
+                    tempCalendarDayModels.add(nominalCalendarDayModel);
+                }
+
+                if (tempCalendarDayModels.size() > 0) {
+                    int size = tempCalendarDayModels.size();
+
+                    for (int j = size - 1; j >= 0; j--)
+                        monthCalendarItems.add(tempCalendarDayModels.get(j));
+                }
             }
 
-//            CalendarItem calendarItem = new CalendarItem(String.valueOf(i));
+            CalendarDayModel calendarDayModel = new CalendarDayModel();
+            calendarDayModel.setDate(getDateFrontAndBackByDate(date, simpleDateFormat, i - 1));
+            calendarDayModel.setDay(i);
 
-//            if (monthPlanArray != null) {
-//                String monthPlanValue = monthPlanArray[i - 1];
-//                if (monthPlanArray != null && !"0".equals(monthPlanValue))
-//                    calendarItem.setMark(monthPlanValue);
-//            }
-
-            monthCalendarItems.add(i);
+            monthCalendarItems.add(calendarDayModel);
         }
 
         return monthCalendarItems;
@@ -125,12 +135,12 @@ public class CalendarUtils {
      * @param date
      * @return
      */
-    public static List<Object> getCalendarItemByDate(Date date, int month) {
+    public static List<CalendarDayModel> getCalendarItemByDate(Date date, SimpleDateFormat simpleDateFormat, int month) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
         calendar.add(Calendar.MONTH, month);
 
-        return getCalendarItemsByDate(calendar.getTime());
+        return getCalendarItemsByDate(calendar.getTime(), simpleDateFormat);
     }
 
     /**

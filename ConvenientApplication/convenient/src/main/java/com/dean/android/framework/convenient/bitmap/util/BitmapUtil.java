@@ -277,8 +277,8 @@ public class BitmapUtil {
      * @param defaultPicResourceId 图片未加载出来前显示的默认图片资源ID
      * @param isSetOnBackground    是否装载到背景
      */
-    private static synchronized void setBitmap2View(final Activity activity, final ImageView imageView, final String bitmapPath, final boolean isFromCache, Integer
-            defaultPicResourceId, final boolean isSetOnBackground) {
+    private static synchronized void setBitmap2View(final Activity activity, final ImageView imageView, final String bitmapPath, final boolean isFromCache,
+                                                    Integer defaultPicResourceId, final boolean isSetOnBackground) {
         /** 设置图片未加载出来前显示的默认图片 **/
         if (defaultPicResourceId != null)
             imageView.setImageResource(defaultPicResourceId);

@@ -119,4 +119,16 @@ public class DatabaseUtil {
         mDatabaseFactory.deleteAll(ormClass, selector);
     }
 
+    /**
+     * 删除指定表
+     *
+     * @param ormClass
+     */
+    public static void dropTable(Class ormClass) {
+        // 创建表
+        mDatabaseFactory.createTableIfNotExists(ormClass);
+        // 删除表
+        mDatabaseFactory.dropTable(ormClass);
+    }
+
 }

@@ -269,7 +269,6 @@ public class DefaultHttpConnection {
                         builder.append(i == 0 ? "?" : "&").append(URLEncoder.encode(key)).append("=").append(value);
                     }
 
-
                     i++;
                 }
         } else if (urlParams instanceof List) {

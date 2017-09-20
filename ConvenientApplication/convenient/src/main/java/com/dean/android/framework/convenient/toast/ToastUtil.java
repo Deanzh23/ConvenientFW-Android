@@ -36,9 +36,14 @@ public class ToastUtil {
      * @param location
      */
     public static void showToast(Context context, String message, int time, int location) {
-        if (toast != null)
-            toast.cancel();
-        toast = Toast.makeText(context, message, time);
+//        if (toast != null)
+//            toast.cancel();
+
+        if (toast == null)
+            toast = Toast.makeText(context, message, time);
+
+        toast.setText(message);
+
         switch (location) {
             case 1:
                 toast.setGravity(Gravity.CENTER, 0, 0);

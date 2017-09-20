@@ -56,21 +56,19 @@ public abstract class ConvenientMainActivity<T extends ViewDataBinding> extends 
             builder.setMessage(title);
         else {
             builder.setTitle(title);
-            builder.setMessage(message);
+            builder.setMessage("更新内容： " + message);
         }
         builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 versionUpdateDialog.dismiss();
 
-                // 强制更新
-                if (versionUpdate.isForceUpdate()) {
+                if (versionUpdate.isForceUpdate())
+                    // 强制更新
                     System.exit(0);
-                }
-                // 不强制更新
-                else {
+                else
+                    // 不强制更新
                     closeMainToHomeActivity();
-                }
             }
         });
         builder.setNeutralButton("更新", new DialogInterface.OnClickListener() {
@@ -78,6 +76,7 @@ public abstract class ConvenientMainActivity<T extends ViewDataBinding> extends 
             public void onClick(DialogInterface dialog, int which) {
                 versionUpdateDialog.dismiss();
                 showUpdateDownload(versionUpdate);
+                ConvenientApplication.startDownloadNewVersionAPK(ConvenientMainActivity.this, mHandler, versionUpdate.getApkDownloadURL());
             }
         });
         builder.setCancelable(false);
