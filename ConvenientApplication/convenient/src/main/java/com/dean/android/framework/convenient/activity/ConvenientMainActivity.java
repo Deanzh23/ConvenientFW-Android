@@ -12,6 +12,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.dean.android.framework.convenient.application.ConvenientApplication;
+import com.dean.android.framework.convenient.file.download.listener.FileDownloadListener;
 import com.dean.android.framework.convenient.version.VersionUpdate;
 
 /**
@@ -23,13 +24,18 @@ import com.dean.android.framework.convenient.version.VersionUpdate;
  */
 public abstract class ConvenientMainActivity<T extends ViewDataBinding> extends ConvenientActivity<T> {
 
-    // 版本更新dialog
+    /**
+     * 版本更新dialog
+     */
     private AlertDialog versionUpdateDialog;
 
     /**
      * 是否app初始化配置和数据完成以后自动跳转，如需翻到最后一页点击进入的效果，请在onCreate(Bundle,boolean)方法中设置为false（默认true）
      */
     private boolean mIsAutoJump = true;
+
+    private FileDownloadListener fileDownloadListener;
+
     private Handler mHandler = new Handler();
 
     /**
@@ -75,8 +81,10 @@ public abstract class ConvenientMainActivity<T extends ViewDataBinding> extends 
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 versionUpdateDialog.dismiss();
+                fileDownloadListener = getFileDownloadListener();
                 showUpdateDownload(versionUpdate);
-                ConvenientApplication.startDownloadNewVersionAPK(ConvenientMainActivity.this, mHandler, versionUpdate.getApkDownloadURL());
+                ConvenientApplication.startDownloadNewVersionAPK(ConvenientMainActivity.this, mHandler, versionUpdate.getApkDownloadURL(), fileDownloadListener,
+                        isUseDefaultDownloadDialog());
             }
         });
         builder.setCancelable(false);
@@ -104,7 +112,7 @@ public abstract class ConvenientMainActivity<T extends ViewDataBinding> extends 
     private void checkAppInitProgress() {
         /** 如果app已经初始化完成，则直接进入下一界面 **/
         if (ConvenientApplication.isAppInitFinish) {
-            if (mIsAutoJump)
+            if (mIsAutoJump && !checkVersionUpdateFinish)
                 aboutCheckVersionUpdate();
         }
         /** app没有初始化完成，注册广播监听器，监听初始化完成广播 **/
@@ -113,9 +121,16 @@ public abstract class ConvenientMainActivity<T extends ViewDataBinding> extends 
     }
 
     /**
+     * 是否已经检查过了版本更新
+     */
+    private boolean checkVersionUpdateFinish;
+
+    /**
      * 版本更新相关
      */
     private void aboutCheckVersionUpdate() {
+        checkVersionUpdateFinish = true;
+
         VersionUpdate versionUpdate = ConvenientApplication.getVersionUpdate();
         // 如果没有新版本，则直接进行后续工作
         if (!versionUpdate.hasNewVersion())
@@ -153,7 +168,23 @@ public abstract class ConvenientMainActivity<T extends ViewDataBinding> extends 
     }
 
     /**
-     * 显示下载更新
+     * 是否使用默认自带的下载进度对话框
+     *
+     * @return
+     */
+    protected abstract boolean isUseDefaultDownloadDialog();
+
+    /**
+     * 获取下载进度监听器
+     *
+     * @return
+     */
+    protected abstract FileDownloadListener getFileDownloadListener();
+
+    /**
+     * 显示下载更新以及进度监听
+     *
+     * @param versionUpdate
      */
     protected abstract void showUpdateDownload(VersionUpdate versionUpdate);
 

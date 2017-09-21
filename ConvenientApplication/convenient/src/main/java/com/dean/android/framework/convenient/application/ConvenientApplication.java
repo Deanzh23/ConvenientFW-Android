@@ -13,6 +13,7 @@ import android.util.Log;
 
 import com.dean.android.framework.convenient.file.download.listener.FileDownloadListener;
 import com.dean.android.framework.convenient.file.util.FileUitl;
+import com.dean.android.framework.convenient.format.MathFormatUtils;
 import com.dean.android.framework.convenient.toast.ToastUtil;
 import com.dean.android.framework.convenient.util.SetUtil;
 import com.dean.android.framework.convenient.version.VersionUpdate;
@@ -32,6 +33,8 @@ import java.util.Map;
  */
 public abstract class ConvenientApplication extends Application {
 
+    public static final String CONVENIENT_TAG = "Convenient";
+
     // app初始化配置和数据完成的Action
     public static final String ACTION_APP_INIT_FINISH = ConvenientApplication.class.getSimpleName() + ".ACTION_APP_INIT_FINISH";
 
@@ -42,6 +45,8 @@ public abstract class ConvenientApplication extends Application {
     // 版本更新类
     private static VersionUpdate versionUpdate;
     private static String versionUpdateDownloadLocalPath;
+
+    private static AlertDialog apkDownloadProgressDialog;
 
     @Override
     public void onCreate() {
@@ -87,8 +92,22 @@ public abstract class ConvenientApplication extends Application {
      * @param handler
      * @param apkDownloadUrl
      */
-    public static void startDownloadNewVersionAPK(final Context context, Handler handler, String apkDownloadUrl) {
+    public static void startDownloadNewVersionAPK(final Context context, final Handler handler, String apkDownloadUrl,
+                                                  final FileDownloadListener fileDownloadListener, final boolean useDefaultDownloadDialog) {
         final String fileName = "update.apk";
+
+        if (useDefaultDownloadDialog) {
+            if (apkDownloadProgressDialog == null) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                builder.setTitle("升级文件下载中...");
+                builder.setCancelable(false);
+
+                apkDownloadProgressDialog = builder.create();
+            }
+
+            apkDownloadProgressDialog.setMessage("");
+            apkDownloadProgressDialog.show();
+        }
 
         FileUitl.download(handler, apkDownloadUrl, versionUpdateDownloadLocalPath, fileName, new FileDownloadListener() {
             @Override
@@ -100,6 +119,8 @@ public abstract class ConvenientApplication extends Application {
             public void success() {
                 ToastUtil.showToast(context, "下载成功");
                 installLocalAPK(context, versionUpdateDownloadLocalPath + "/" + fileName);
+
+                System.exit(0);
             }
 
             @Override
@@ -119,7 +140,13 @@ public abstract class ConvenientApplication extends Application {
 
             @Override
             public void progress(int current, int total) {
-                ToastUtil.showToast(context, "下载进度: " + current + " / " + total);
+                Log.d(CONVENIENT_TAG, "下载进度: " + current + " / " + total);
+
+                if (useDefaultDownloadDialog && apkDownloadProgressDialog != null)
+                    apkDownloadProgressDialog.setMessage(MathFormatUtils.formatByte(current) + " / " + MathFormatUtils.formatByte(total));
+
+                if (fileDownloadListener != null)
+                    fileDownloadListener.progress(current, total);
             }
         });
     }

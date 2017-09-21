@@ -11,12 +11,6 @@ public class ConvenientDemoApplication extends ConvenientApplication {
 
     @Override
     protected void initConfigAndData() {
-        try {
-            Thread.sleep(3000);
-        } catch (InterruptedException e) {
-        }
-
-//        DatabaseUtil.init();
     }
 
     @Override

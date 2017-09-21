@@ -29,8 +29,8 @@ dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     compile project(':convenient')
     compile project(':gaodemap')
-    compile project(':ui')
     compile project(':googlemap')
+    compile project(':ui')
     compile 'com.google.android.gms:play-services:10.0.0'
     //noinspection GradleCompatible
     compile 'com.android.support:multidex:1.0.0'
