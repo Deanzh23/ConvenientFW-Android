@@ -20,6 +20,6 @@ public class ConvenientDemoApplication extends ConvenientApplication {
 
     @Override
     protected String checkVersionUrl() {
-        return "http://124.95.128.250:909/api/sys/appversion/getappversion";
+        return null;
     }
 }

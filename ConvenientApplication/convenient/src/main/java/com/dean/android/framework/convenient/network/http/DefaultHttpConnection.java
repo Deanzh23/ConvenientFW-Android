@@ -128,6 +128,7 @@ public class DefaultHttpConnection {
      * 发送HttpPost请求
      *
      * @param basicURL
+     * @param headerParams
      * @param urlParams
      * @param bodyParams
      * @param encoding
@@ -135,7 +136,7 @@ public class DefaultHttpConnection {
      * @param isUseCache
      * @param httpConnectionListener
      */
-    public void sendHttpPost(String basicURL, Map<String, String> headerParams, Object urlParams, Map<String, String> bodyParams, String encoding,
+    public void sendHttpPost(String basicURL, Map<String, String> headerParams, Object urlParams, Object bodyParams, String encoding,
                              int timeOut, boolean isUseCache, HttpConnectionListener httpConnectionListener) {
         String urlParam = getHttpURL(basicURL, urlParams);
 
@@ -153,21 +154,34 @@ public class DefaultHttpConnection {
             connection.connect();
 
             /** body **/
-            if (!SetUtil.isEmpty(bodyParams)) {
-                JSONObject bodyJSONObject = new JSONObject();
+            JSONObject bodyJSONObject = null;
+            String bodyString = null;
 
-                for (Map.Entry<String, String> entry : bodyParams.entrySet()) {
+            if (bodyParams instanceof Map) {
+                Map<String, String> bodyMap = (Map<String, String>) bodyParams;
+
+                if (SetUtil.isEmpty(bodyMap))
+                    return;
+
+                bodyJSONObject = new JSONObject();
+
+                for (Map.Entry<String, String> entry : bodyMap.entrySet()) {
                     String key = entry.getKey();
                     String value = entry.getValue();
 
                     bodyJSONObject.put(URLEncoder.encode(key, "utf-8"), URLEncoder.encode(value, "utf-8"));
                 }
-
-                OutputStream outputStream = connection.getOutputStream();
-                outputStream.write(bodyJSONObject.toString().getBytes());
-                outputStream.flush();
-                outputStream.close();
+            } else if (bodyParams instanceof String) {
+                bodyString = (String) bodyParams;
             }
+
+            OutputStream outputStream = connection.getOutputStream();
+            if (bodyJSONObject != null)
+                outputStream.write(bodyJSONObject.toString().getBytes());
+            else if (bodyString != null)
+                outputStream.write(bodyString.getBytes());
+            outputStream.flush();
+            outputStream.close();
 
             /** 响应 **/
             int responseCode = connection.getResponseCode();
