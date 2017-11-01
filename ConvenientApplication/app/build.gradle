@@ -1,7 +1,7 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 'Google Inc.:Google APIs:24'
+    compileSdkVersion 25
     buildToolsVersion '26.0.2'
     defaultConfig {
         applicationId "com.dean.android.famework.convenientapplication"
@@ -32,6 +32,5 @@ dependencies {
     compile project(':googlemap')
     compile project(':ui')
     compile 'com.google.android.gms:play-services:10.0.0'
-    //noinspection GradleCompatible
     compile 'com.android.support:multidex:1.0.0'
 }
