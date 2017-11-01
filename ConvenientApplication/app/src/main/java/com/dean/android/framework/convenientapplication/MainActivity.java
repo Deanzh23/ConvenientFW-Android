@@ -11,6 +11,8 @@ import com.dean.android.framework.convenient.view.ContentView;
 import com.dean.android.framework.convenientapplication.ui.DataBindingActivity;
 
 /**
+ * 欢迎页Activity
+ * <p>
  * Created by Dean on 2016/11/8.
  */
 @Permission({Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE})
