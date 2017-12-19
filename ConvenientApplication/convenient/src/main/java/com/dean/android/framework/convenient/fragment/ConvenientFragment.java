@@ -22,7 +22,9 @@ public class ConvenientFragment<T extends ViewDataBinding> extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        /** 设置DataBinding相关配置 **/
         viewDataBinding = BindingViewController.inject(this, viewDataBinding);
+
         return viewDataBinding.getRoot();
     }
 }

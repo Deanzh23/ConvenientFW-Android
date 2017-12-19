@@ -19,7 +19,7 @@ import android.widget.ImageView;
 import com.dean.android.framework.convenient.bitmap.cache.BitmapCache;
 import com.dean.android.framework.convenient.bitmap.listener.BitmapDownloadListener;
 import com.dean.android.framework.convenient.bitmap.listener.PictureWriteListener;
-import com.dean.android.framework.convenient.code.CodeUtils;
+import com.dean.android.framework.convenient.util.CodeUtils;
 import com.dean.android.framework.convenient.exception.FileException;
 import com.dean.android.framework.convenient.exception.HasNoPermissionException;
 import com.dean.android.framework.convenient.permission.util.PermissionsUtil;
@@ -59,7 +59,7 @@ public class BitmapUtil {
      */
     public static final int ACTION_OPEN_CAMERA = 1;
 
-    @BindingAdapter({"imageUrl", "path", "isBackground"})
+    @BindingAdapter({"url", "path", "isBackground"})
     public static void imageLoader(final ImageView imageView, final String url, final String path, final boolean isBackground) {
         // 建立一个ImageView和url的绑定关系
         imageView.setTag(url);

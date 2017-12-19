@@ -31,9 +31,9 @@
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
                 android:background="@mipmap/ic_launcher"
-                app:imageUrl="@{userInfo.avatarUrl}"
                 app:isBackground="@{false}"
-                app:path="@{`td/image`}"/>
+                app:path="@{`td/image`}"
+                app:url="@{userInfo.avatarUrl}"/>
 
             <EditText
                 android:id="@+id/userName"

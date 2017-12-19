@@ -2,6 +2,7 @@ package com.dean.android.framework.convenient.network.http;
 
 import com.dean.android.framework.convenient.network.http.listener.HttpConnectionListener;
 
+import java.io.File;
 import java.util.Map;
 
 /**
@@ -48,6 +49,18 @@ public class ConvenientHttpConnection extends DefaultHttpConnection {
      */
     public void sendHttpPost(String basicURL, Map<String, String> headerParams, Object params, String bodyParams, HttpConnectionListener httpConnectionListener) {
         super.sendHttpPost(basicURL, headerParams, params, bodyParams, "utf-8", 5000, false, httpConnectionListener);
+    }
+
+    /**
+     * 文件上传
+     *
+     * @param basicURL
+     * @param urlParams
+     * @param file
+     * @param httpConnectionListener
+     */
+    public void sendFile(String basicURL, Object urlParams, File file, HttpConnectionListener httpConnectionListener) {
+        super.sendFile(basicURL, urlParams, file, httpConnectionListener);
     }
 
 }

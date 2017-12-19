@@ -33,8 +33,11 @@ public class BindingViewController {
      * @return
      */
     public static <T extends ViewDataBinding> T inject(ConvenientActivity activity, T viewDataBinding) {
+        // ContentView注入
         viewDataBinding = injectContentView(activity, viewDataBinding);
+        // View注入
         injectWidget(activity, viewDataBinding);
+        // OnClick注入
         injectOnClick(activity, viewDataBinding);
 
         return viewDataBinding;
@@ -49,7 +52,12 @@ public class BindingViewController {
      * @return
      */
     public static <T extends ViewDataBinding> T inject(ConvenientFragment fragment, T viewDataBinding) {
+        // ContentView注入
         viewDataBinding = injectFragmentView(fragment, viewDataBinding);
+        // View注入
+        injectWidget(fragment, viewDataBinding);
+        // OnClick注入
+        injectOnClick(fragment, viewDataBinding);
 
         return viewDataBinding;
     }
@@ -158,6 +166,73 @@ public class BindingViewController {
                     public void onClick(View view) {
                         try {
                             method.invoke(activity);
+                        } catch (IllegalAccessException e) {
+                        } catch (InvocationTargetException e) {
+                        }
+                    }
+                });
+            }
+        }
+    }
+
+    /**
+     * Fragment注入实例化控件
+     *
+     * @param fragment
+     * @param viewDataBinding
+     * @param <T>
+     */
+    private static <T extends ViewDataBinding> void injectWidget(Fragment fragment, T viewDataBinding) {
+        Class<? extends Fragment> fragmentClass = fragment.getClass();
+        Field[] fields = fragmentClass.getDeclaredFields();
+
+        if (fields != null && fields.length > 0) {
+            for (Field field : fields) {
+                ViewInject viewInjectAnnotation = field.getAnnotation(ViewInject.class);
+
+                if (viewInjectAnnotation == null)
+                    continue;
+
+                String fieldName = field.getName();
+                int viewId = fragment.getResources().getIdentifier(fieldName, "id", fragment.getContext().getPackageName());
+
+                try {
+                    Object view = viewDataBinding.getRoot().findViewById(viewId);
+                    field.setAccessible(true);
+                    field.set(fragment, view);
+                } catch (IllegalAccessException e) {
+                }
+            }
+        }
+    }
+
+    /**
+     * Fragment注入OnClick事件
+     *
+     * @param fragment
+     * @param viewDataBinding
+     * @param <T>
+     */
+    private static <T extends ViewDataBinding> void injectOnClick(final Fragment fragment, T viewDataBinding) {
+        Class<? extends Fragment> fragmentClass = fragment.getClass();
+        Method[] methods = fragmentClass.getDeclaredMethods();
+
+        if (methods != null && methods.length > 0) {
+            for (final Method method : methods) {
+                OnClick onClickAnnotation = method.getAnnotation(OnClick.class);
+
+                if (onClickAnnotation == null)
+                    continue;
+
+                method.setAccessible(true);
+                int viewId = onClickAnnotation.value();
+
+                View view = viewDataBinding.getRoot().findViewById(viewId);
+                view.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        try {
+                            method.invoke(fragment);
                         } catch (IllegalAccessException e) {
                         } catch (InvocationTargetException e) {
                         }

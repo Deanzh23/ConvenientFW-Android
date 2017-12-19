@@ -4,17 +4,23 @@ import android.util.Log;
 
 import com.dean.android.framework.convenient.network.http.listener.HttpConnectionListener;
 import com.dean.android.framework.convenient.util.SetUtil;
+import com.lidroid.xutils.HttpUtils;
+import com.lidroid.xutils.exception.HttpException;
+import com.lidroid.xutils.http.RequestParams;
+import com.lidroid.xutils.http.ResponseInfo;
+import com.lidroid.xutils.http.callback.RequestCallBack;
+import com.lidroid.xutils.http.client.HttpRequest;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -35,7 +41,7 @@ public class DefaultHttpConnection {
      * @param params
      * @param httpConnectionListener
      */
-    public void sendHttpGet(String basicURL, Map<String, String> headerParams, Object params, HttpConnectionListener httpConnectionListener) {
+    protected void sendHttpGet(String basicURL, Map<String, String> headerParams, Object params, HttpConnectionListener httpConnectionListener) {
         sendHttpGet(basicURL, headerParams, params, "utf-8", 5000, false, httpConnectionListener);
     }
 
@@ -50,8 +56,8 @@ public class DefaultHttpConnection {
      * @param isUseCache
      * @param httpConnectionListener
      */
-    public void sendHttpGet(String basicURL, Map<String, String> headerParams, Object urlParams, String encoding, int timeOut, boolean isUseCache,
-                            HttpConnectionListener httpConnectionListener) {
+    protected void sendHttpGet(String basicURL, Map<String, String> headerParams, Object urlParams, String encoding, int timeOut, boolean isUseCache,
+                               HttpConnectionListener httpConnectionListener) {
         String urlParam = getHttpURL(basicURL, urlParams);
 
         HttpURLConnection connection = null;
@@ -82,21 +88,15 @@ public class DefaultHttpConnection {
                 Log.d(ConvenientHttpConnection.class.getSimpleName(), "response is " + (responseBuilder.length() == 0 ? null : responseBuilder.toString()));
 
                 if (httpConnectionListener != null)
-                    httpConnectionListener.success(responseBuilder.length() == 0 ? null : responseBuilder.toString());
+                    httpConnectionListener.requestSuccess(responseBuilder.length() == 0 ? null : responseBuilder.toString());
             } else {
                 if (httpConnectionListener != null)
-                    httpConnectionListener.error(responseCode);
+                    httpConnectionListener.requestError(responseCode);
             }
-        } catch (MalformedURLException e) {
-            if (httpConnectionListener != null)
-                httpConnectionListener.error(-1);
         } catch (IOException e) {
             if (httpConnectionListener != null)
-                httpConnectionListener.error(-1);
+                httpConnectionListener.requestError(-1);
         } finally {
-            if (httpConnectionListener != null)
-                httpConnectionListener.end();
-
             try {
                 if (reader != null)
                     reader.close();
@@ -107,6 +107,7 @@ public class DefaultHttpConnection {
                 if (connection != null)
                     connection.disconnect();
             } catch (IOException e) {
+                e.printStackTrace();
             }
         }
     }
@@ -119,8 +120,8 @@ public class DefaultHttpConnection {
      * @param bodyParams
      * @param httpConnectionListener
      */
-    public void sendHttpPost(String basicURL, Map<String, String> headerParams, Object params, Map<String, String> bodyParams,
-                             HttpConnectionListener httpConnectionListener) {
+    protected void sendHttpPost(String basicURL, Map<String, String> headerParams, Object params, Map<String, String> bodyParams,
+                                HttpConnectionListener httpConnectionListener) {
         sendHttpPost(basicURL, headerParams, params, bodyParams, "utf-8", 5000, false, httpConnectionListener);
     }
 
@@ -136,8 +137,8 @@ public class DefaultHttpConnection {
      * @param isUseCache
      * @param httpConnectionListener
      */
-    public void sendHttpPost(String basicURL, Map<String, String> headerParams, Object urlParams, Object bodyParams, String encoding,
-                             int timeOut, boolean isUseCache, HttpConnectionListener httpConnectionListener) {
+    protected void sendHttpPost(String basicURL, Map<String, String> headerParams, Object urlParams, Object bodyParams, String encoding, int timeOut, boolean isUseCache,
+                                HttpConnectionListener httpConnectionListener) {
         String urlParam = getHttpURL(basicURL, urlParams);
 
         HttpURLConnection connection = null;
@@ -157,22 +158,24 @@ public class DefaultHttpConnection {
             JSONObject bodyJSONObject = null;
             String bodyString = null;
 
-            if (bodyParams instanceof Map) {
-                Map<String, String> bodyMap = (Map<String, String>) bodyParams;
+            if (bodyParams != null) {
+                if (bodyParams instanceof Map) {
+                    Map<String, String> bodyMap = (Map<String, String>) bodyParams;
 
-                if (SetUtil.isEmpty(bodyMap))
-                    return;
+                    if (SetUtil.isEmpty(bodyMap))
+                        return;
 
-                bodyJSONObject = new JSONObject();
+                    bodyJSONObject = new JSONObject();
 
-                for (Map.Entry<String, String> entry : bodyMap.entrySet()) {
-                    String key = entry.getKey();
-                    String value = entry.getValue();
+                    for (Map.Entry<String, String> entry : bodyMap.entrySet()) {
+                        String key = entry.getKey();
+                        String value = entry.getValue();
 
-                    bodyJSONObject.put(URLEncoder.encode(key, "utf-8"), URLEncoder.encode(value, "utf-8"));
+                        bodyJSONObject.put(URLEncoder.encode(key, "utf-8"), URLEncoder.encode(value, "utf-8"));
+                    }
+                } else if (bodyParams instanceof String) {
+                    bodyString = (String) bodyParams;
                 }
-            } else if (bodyParams instanceof String) {
-                bodyString = (String) bodyParams;
             }
 
             OutputStream outputStream = connection.getOutputStream();
@@ -198,24 +201,15 @@ public class DefaultHttpConnection {
                 Log.d(ConvenientHttpConnection.class.getSimpleName(), "response is " + (responseBuilder.length() == 0 ? null : responseBuilder.toString()));
 
                 if (httpConnectionListener != null)
-                    httpConnectionListener.success(responseBuilder.length() == 0 ? null : responseBuilder.toString());
+                    httpConnectionListener.requestSuccess(responseBuilder.length() == 0 ? null : responseBuilder.toString());
             } else {
                 if (httpConnectionListener != null)
-                    httpConnectionListener.error(responseCode);
+                    httpConnectionListener.requestError(responseCode);
             }
-        } catch (MalformedURLException e) {
+        } catch (JSONException | IOException e) {
             if (httpConnectionListener != null)
-                httpConnectionListener.error(-1);
-        } catch (IOException e) {
-            if (httpConnectionListener != null)
-                httpConnectionListener.error(-1);
-        } catch (JSONException e) {
-            if (httpConnectionListener != null)
-                httpConnectionListener.error(-1);
+                httpConnectionListener.requestError(-1);
         } finally {
-            if (httpConnectionListener != null)
-                httpConnectionListener.end();
-
             try {
                 if (reader != null)
                     reader.close();
@@ -226,8 +220,38 @@ public class DefaultHttpConnection {
                 if (connection != null)
                     connection.disconnect();
             } catch (IOException e) {
+                e.printStackTrace();
             }
         }
+    }
+
+    /**
+     * 文件上传
+     *
+     * @param basicURL
+     * @param urlParams
+     * @param file
+     * @param httpConnectionListener
+     */
+    public void sendFile(String basicURL, Object urlParams, File file, HttpConnectionListener httpConnectionListener) {
+        HttpUtils httpUtils = new HttpUtils();
+        RequestParams params = new RequestParams();
+
+        String url = getHttpURL(basicURL, urlParams);
+        params.addBodyParameter("file", file, "image/png");
+        httpUtils.send(HttpRequest.HttpMethod.POST, url, params, new RequestCallBack<String>() {
+            @Override
+            public void onSuccess(ResponseInfo<String> responseInfo) {
+                if (httpConnectionListener != null)
+                    httpConnectionListener.requestSuccess(responseInfo.result);
+            }
+
+            @Override
+            public void onFailure(HttpException e, String s) {
+                if (httpConnectionListener != null)
+                    httpConnectionListener.requestError(e.getExceptionCode());
+            }
+        });
     }
 
     /**
@@ -297,6 +321,5 @@ public class DefaultHttpConnection {
 
         return builder.toString();
     }
-
 
 }
