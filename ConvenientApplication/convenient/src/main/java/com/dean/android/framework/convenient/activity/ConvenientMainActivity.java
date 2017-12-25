@@ -2,7 +2,6 @@ package com.dean.android.framework.convenient.activity;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.databinding.ViewDataBinding;
@@ -64,28 +63,22 @@ public abstract class ConvenientMainActivity<T extends ViewDataBinding> extends 
             builder.setTitle(title);
             builder.setMessage("更新内容： " + message);
         }
-        builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                versionUpdateDialog.dismiss();
+        builder.setNegativeButton("取消", (dialog, which) -> {
+            versionUpdateDialog.dismiss();
 
-                if (versionUpdate.isForceUpdate())
-                    // 强制更新
-                    System.exit(0);
-                else
-                    // 不强制更新
-                    closeMainToHomeActivity();
-            }
+            if (versionUpdate.isForceUpdate())
+                // 强制更新
+                System.exit(0);
+            else
+                // 不强制更新
+                closeMainToHomeActivity();
         });
-        builder.setNeutralButton("更新", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                versionUpdateDialog.dismiss();
-                fileDownloadListener = getFileDownloadListener();
-                showUpdateDownload(versionUpdate);
-                ConvenientApplication.startDownloadNewVersionAPK(ConvenientMainActivity.this, mHandler, versionUpdate.getApkDownloadURL(), fileDownloadListener,
-                        isUseDefaultDownloadDialog());
-            }
+        builder.setNeutralButton("更新", (dialog, which) -> {
+            versionUpdateDialog.dismiss();
+            fileDownloadListener = getFileDownloadListener();
+            showUpdateDownload(versionUpdate);
+            ConvenientApplication.startDownloadNewVersionAPK(ConvenientMainActivity.this, mHandler, versionUpdate.getApkDownloadURL(), fileDownloadListener,
+                    isUseDefaultDownloadDialog());
         });
         builder.setCancelable(false);
 

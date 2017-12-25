@@ -9,7 +9,6 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.StrictMode;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
 import com.dean.android.framework.convenient.file.download.listener.FileDownloadListener;
@@ -18,9 +17,7 @@ import com.dean.android.framework.convenient.format.MathFormatUtils;
 import com.dean.android.framework.convenient.toast.ToastUtil;
 import com.dean.android.framework.convenient.util.SetUtil;
 import com.dean.android.framework.convenient.version.VersionUpdate;
-import com.dean.android.framework.convenient.version.listener.OnCheckVersionListener;
-
-import org.json.JSONObject;
+import com.umeng.commonsdk.UMConfigure;
 
 import java.io.File;
 import java.util.HashMap;
@@ -53,40 +50,38 @@ public abstract class ConvenientApplication extends Application {
     public void onCreate() {
         super.onCreate();
 
-        init();
+        // 版本升级
+        versionUpdate();
 
         // 解决URI问题
         StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
         StrictMode.setVmPolicy(builder.build());
+
+        // 初始化"友盟统计"
+        UMConfigure.init(this, UMConfigure.DEVICE_TYPE_PHONE, "");
     }
 
     /**
      * 初始化
      */
-    private void init() {
+    private void versionUpdate() {
         versionUpdate = new VersionUpdate(ConvenientApplication.this.getApplicationContext());
         versionUpdate.setCheckUpdateURL(checkVersionUrl());
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                /** 抽象方法，开发人员根据业务自己实现初始化加载的配置和数据 **/
-                initConfigAndData();
+        new Thread(() -> {
+            /** 抽象方法，开发人员根据业务自己实现初始化加载的配置和数据 **/
+            initConfigAndData();
 
-                versionUpdate.checkUpdate(new OnCheckVersionListener() {
-                    @Override
-                    public void onCheck(boolean hasVersionUpdate, final JSONObject updateInfo) {
-                        if (!hasVersionUpdate || updateInfo == null)
-                            // 如果没有新版本更新，设置app初始化完成
-                            appInitFinish();
-                        else
-                            // 显示版本更新提示框
-                            versionUpdateDownloadLocalPath = setVersionUpdateDownloadLocalPath();
+            versionUpdate.checkUpdate((hasVersionUpdate, updateInfo) -> {
+                if (!hasVersionUpdate || updateInfo == null)
+                    // 如果没有新版本更新，设置app初始化完成
+                    appInitFinish();
+                else
+                    // 显示版本更新提示框
+                    versionUpdateDownloadLocalPath = setVersionUpdateDownloadLocalPath();
 
-                        appInitFinish();
-                    }
-                });
-            }
+                appInitFinish();
+            });
         }).start();
     }
 
@@ -97,8 +92,8 @@ public abstract class ConvenientApplication extends Application {
      * @param handler
      * @param apkDownloadUrl
      */
-    public static void startDownloadNewVersionAPK(final Context context, final Handler handler, String apkDownloadUrl,
-                                                  final FileDownloadListener fileDownloadListener, final boolean useDefaultDownloadDialog) {
+    public static void startDownloadNewVersionAPK(final Context context, final Handler handler, String apkDownloadUrl, final FileDownloadListener fileDownloadListener,
+                                                  final boolean useDefaultDownloadDialog) {
         final String fileName = "update.apk";
 
         if (useDefaultDownloadDialog) {
@@ -229,12 +224,10 @@ public abstract class ConvenientApplication extends Application {
     }
 
     private static void finishActivity(Object object) {
+        Log.d(ConvenientApplication.class.getSimpleName(), "[finishActivity]--> finish activity name is " + object.getClass().getSimpleName());
+
         if (object instanceof Activity)
             ((Activity) object).finish();
-        else if (object instanceof AppCompatActivity) {
-            ((AppCompatActivity) object).finish();
-        }
-        Log.d(ConvenientApplication.class.getSimpleName(), "[finishActivity]--> finish activity name is " + object.getClass().getSimpleName());
     }
 
     public static VersionUpdate getVersionUpdate() {

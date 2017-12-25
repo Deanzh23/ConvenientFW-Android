@@ -14,9 +14,9 @@ public abstract class HttpConnectionListener {
      *
      * @param response
      */
-    public void requestSuccess(String response) {
-        success(response);
-        end();
+    public void onRequestSuccess(String response) {
+        onSuccess(response);
+        onEnd();
     }
 
     /**
@@ -26,9 +26,19 @@ public abstract class HttpConnectionListener {
      *
      * @param responseCode
      */
-    public void requestError(int responseCode) {
-        error(responseCode);
-        end();
+    public void onRequestError(int responseCode) {
+        onError(responseCode);
+        onEnd();
+    }
+
+    /**
+     * token失效（返回状态码9004）
+     * <p>
+     * 由框架调用此方法
+     */
+    public void onRequestTokenFailure() {
+        onEnd();
+        onTokenFailure();
     }
 
     /**
@@ -38,7 +48,7 @@ public abstract class HttpConnectionListener {
      *
      * @param response
      */
-    public abstract void success(String response);
+    public abstract void onSuccess(String response);
 
     /**
      * 请求失败（返回状态码非200的其它）
@@ -47,13 +57,20 @@ public abstract class HttpConnectionListener {
      *
      * @param responseCode
      */
-    public abstract void error(int responseCode);
+    public abstract void onError(int responseCode);
+
+    /**
+     * token失效（返回状态码非9004）
+     * <p>
+     * 由客户端实现
+     */
+    public abstract void onTokenFailure();
 
     /**
      * 请求完成
      * <p>
      * 由客户端实现
      */
-    public abstract void end();
+    public abstract void onEnd();
 
 }

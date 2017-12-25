@@ -10,10 +10,11 @@ import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.dean.android.framework.convenient.application.ConvenientApplication;
-import com.dean.android.framework.convenient.permission.annotations.listener.PermissionAnnotationListener;
+import com.dean.android.framework.convenient.keyboard.KeyboardUtil;
 import com.dean.android.framework.convenient.permission.annotations.util.PermissionAnnotationsUtil;
 import com.dean.android.framework.convenient.permission.util.PermissionsUtil;
 import com.dean.android.framework.convenient.view.util.BindingViewController;
+import com.umeng.analytics.MobclickAgent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,19 +56,33 @@ public class ConvenientActivity<T extends ViewDataBinding> extends AppCompatActi
         viewDataBinding = BindingViewController.inject(this, viewDataBinding);
 
         /** 解析并申请权限 **/
-        PermissionAnnotationsUtil.inject(this, new PermissionAnnotationListener() {
-            @Override
-            public void success(String[] permissionArray) {
-                mPermissionArray = permissionArray;
-            }
-        });
+        PermissionAnnotationsUtil.inject(this, permissionArray -> mPermissionArray = permissionArray);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        // 收起软键盘
+        KeyboardUtil.hideSoftKeyboard(this);
+        // 友盟Session统计
+        MobclickAgent.onPageStart(getClass().getSimpleName());
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        // 友盟Session统计
+        MobclickAgent.onPageEnd(getClass().getSimpleName());
+        MobclickAgent.onPause(this);
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         /** 如果没有被申请的权限，则返回 **/
-        if (mPermissionArray == null || mPermissionArray.length <= 0 || permissions == null || permissions.length <= 0)
+        if (mPermissionArray == null || mPermissionArray.length <= 0 || permissions.length <= 0)
             return;
 
         List<String> permissionList = new ArrayList<>();

@@ -35,6 +35,15 @@ import java.util.Map;
 public class DefaultHttpConnection {
 
     /**
+     * 应答"成功"
+     */
+    public static final String RESPONSE_SUCCESS = "200";
+    /**
+     * 应答"token失效"
+     */
+    public static final String RESPONSE_TOKEN_LOSE_EFFICACY = "9004";
+
+    /**
      * 发送默认配置的HttpGet请求
      *
      * @param basicURL
@@ -52,11 +61,11 @@ public class DefaultHttpConnection {
      * @param headerParams
      * @param urlParams
      * @param encoding
-     * @param timeOut
-     * @param isUseCache
+     * @param connectTimeout
+     * @param useCaches
      * @param httpConnectionListener
      */
-    protected void sendHttpGet(String basicURL, Map<String, String> headerParams, Object urlParams, String encoding, int timeOut, boolean isUseCache,
+    protected void sendHttpGet(String basicURL, Map<String, String> headerParams, Object urlParams, String encoding, int connectTimeout, boolean useCaches,
                                HttpConnectionListener httpConnectionListener) {
         String urlParam = getHttpURL(basicURL, urlParams);
 
@@ -69,7 +78,7 @@ public class DefaultHttpConnection {
             URL url = new URL(urlParam);
 
             connection = (HttpURLConnection) url.openConnection();
-            setHttpURLConnectionConfig(connection, "GET", encoding, timeOut, isUseCache, headerParams);
+            setHttpURLConnectionConfig(connection, "GET", encoding, connectTimeout, useCaches, headerParams);
 
             connection.connect();
 
@@ -87,15 +96,25 @@ public class DefaultHttpConnection {
 
                 Log.d(ConvenientHttpConnection.class.getSimpleName(), "response is " + (responseBuilder.length() == 0 ? null : responseBuilder.toString()));
 
-                if (httpConnectionListener != null)
-                    httpConnectionListener.requestSuccess(responseBuilder.length() == 0 ? null : responseBuilder.toString());
+                if (httpConnectionListener != null) {
+                    // 验证token
+                    JSONObject response = new JSONObject(responseBuilder.toString());
+                    String code = response.getString("code");
+                    // 返回"token失效"应答
+                    if (RESPONSE_TOKEN_LOSE_EFFICACY.equals(code)) {
+                        httpConnectionListener.onRequestTokenFailure();
+                    }
+                    // 正常返回应答
+                    else
+                        httpConnectionListener.onRequestSuccess(responseBuilder.length() == 0 ? null : responseBuilder.toString());
+                }
             } else {
                 if (httpConnectionListener != null)
-                    httpConnectionListener.requestError(responseCode);
+                    httpConnectionListener.onRequestError(responseCode);
             }
-        } catch (IOException e) {
+        } catch (IOException | JSONException e) {
             if (httpConnectionListener != null)
-                httpConnectionListener.requestError(-1);
+                httpConnectionListener.onRequestError(-1);
         } finally {
             try {
                 if (reader != null)
@@ -133,12 +152,12 @@ public class DefaultHttpConnection {
      * @param urlParams
      * @param bodyParams
      * @param encoding
-     * @param timeOut
-     * @param isUseCache
+     * @param connectTimeout
+     * @param useCaches
      * @param httpConnectionListener
      */
-    protected void sendHttpPost(String basicURL, Map<String, String> headerParams, Object urlParams, Object bodyParams, String encoding, int timeOut, boolean isUseCache,
-                                HttpConnectionListener httpConnectionListener) {
+    protected void sendHttpPost(String basicURL, Map<String, String> headerParams, Object urlParams, Object bodyParams, String encoding, int connectTimeout,
+                                boolean useCaches, HttpConnectionListener httpConnectionListener) {
         String urlParam = getHttpURL(basicURL, urlParams);
 
         HttpURLConnection connection = null;
@@ -150,7 +169,7 @@ public class DefaultHttpConnection {
             URL url = new URL(urlParam);
 
             connection = (HttpURLConnection) url.openConnection();
-            setHttpURLConnectionConfig(connection, "POST", encoding, timeOut, isUseCache, headerParams);
+            setHttpURLConnectionConfig(connection, "POST", encoding, connectTimeout, useCaches, headerParams);
 
             connection.connect();
 
@@ -200,15 +219,25 @@ public class DefaultHttpConnection {
 
                 Log.d(ConvenientHttpConnection.class.getSimpleName(), "response is " + (responseBuilder.length() == 0 ? null : responseBuilder.toString()));
 
-                if (httpConnectionListener != null)
-                    httpConnectionListener.requestSuccess(responseBuilder.length() == 0 ? null : responseBuilder.toString());
+                if (httpConnectionListener != null) {
+                    // 验证token
+                    JSONObject response = new JSONObject(responseBuilder.toString());
+                    String code = response.getString("code");
+                    // 返回"token失效"应答
+                    if (RESPONSE_TOKEN_LOSE_EFFICACY.equals(code)) {
+                        httpConnectionListener.onRequestTokenFailure();
+                    }
+                    // 正常返回应答
+                    else
+                        httpConnectionListener.onRequestSuccess(responseBuilder.length() == 0 ? null : responseBuilder.toString());
+                }
             } else {
                 if (httpConnectionListener != null)
-                    httpConnectionListener.requestError(responseCode);
+                    httpConnectionListener.onRequestError(responseCode);
             }
         } catch (JSONException | IOException e) {
             if (httpConnectionListener != null)
-                httpConnectionListener.requestError(-1);
+                httpConnectionListener.onRequestError(-1);
         } finally {
             try {
                 if (reader != null)
@@ -239,17 +268,32 @@ public class DefaultHttpConnection {
 
         String url = getHttpURL(basicURL, urlParams);
         params.addBodyParameter("file", file, "image/png");
+        httpUtils.configSoTimeout(10000);
         httpUtils.send(HttpRequest.HttpMethod.POST, url, params, new RequestCallBack<String>() {
             @Override
             public void onSuccess(ResponseInfo<String> responseInfo) {
-                if (httpConnectionListener != null)
-                    httpConnectionListener.requestSuccess(responseInfo.result);
+                // 验证token
+                try {
+                    JSONObject response = new JSONObject(responseInfo.result);
+                    String code = response.getString("code");
+                    // 返回"token失效"应答
+                    if (RESPONSE_TOKEN_LOSE_EFFICACY.equals(code)) {
+                        httpConnectionListener.onRequestTokenFailure();
+                    }
+                    // 正常返回应答
+                    else
+                        httpConnectionListener.onRequestSuccess(responseInfo.result);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    if (httpConnectionListener != null)
+                        httpConnectionListener.onRequestError(-1);
+                }
             }
 
             @Override
             public void onFailure(HttpException e, String s) {
                 if (httpConnectionListener != null)
-                    httpConnectionListener.requestError(e.getExceptionCode());
+                    httpConnectionListener.onRequestError(e.getExceptionCode());
             }
         });
     }
@@ -259,16 +303,16 @@ public class DefaultHttpConnection {
      *
      * @param connection
      * @param encoding
-     * @param timeOut
-     * @param isUseCache
+     * @param connectTimeout
+     * @param useCaches
      */
-    private void setHttpURLConnectionConfig(HttpURLConnection connection, String requestMethod, String encoding, int timeOut, boolean isUseCache,
+    private void setHttpURLConnectionConfig(HttpURLConnection connection, String requestMethod, String encoding, int connectTimeout, boolean useCaches,
                                             Map<String, String> headerParams) throws ProtocolException {
         connection.setRequestMethod(requestMethod);
         connection.setRequestProperty("encoding", encoding);
         connection.setRequestProperty("Content-Type", "application/json; charset=utf-8");
-        connection.setConnectTimeout(timeOut);
-        connection.setUseCaches(isUseCache);
+        connection.setConnectTimeout(connectTimeout);
+        connection.setUseCaches(useCaches);
 
         // 设置用户header参数
         if (!SetUtil.isEmpty(headerParams)) {

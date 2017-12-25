@@ -86,7 +86,7 @@ public class VersionUpdate {
             ConvenientHttpConnection connection = new ConvenientHttpConnection();
             connection.sendHttpGet(checkUpdateURL, null, null, new HttpConnectionListener() {
                 @Override
-                public void success(String response) {
+                public void onSuccess(String response) {
                     try {
                         JSONObject json = new JSONObject(response);
                         serverVersionCode = json.getInt("versionCode");
@@ -106,12 +106,16 @@ public class VersionUpdate {
                 }
 
                 @Override
-                public void error(int responseCode) {
+                public void onError(int responseCode) {
                     onCheckVersionListener.onCheck(false, null);
                 }
 
                 @Override
-                public void end() {
+                public void onTokenFailure() {
+                }
+
+                @Override
+                public void onEnd() {
                 }
             });
         }
