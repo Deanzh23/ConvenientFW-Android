@@ -47,25 +47,23 @@ public class BitmapCache {
         SoftReference<Bitmap> bitmapSoftReference = null;
 
         if (isFromCache) {
-            /** 检索mBitmapMap中是否存在要找的Bitmap **/
+            // 检索mBitmapMap中是否存在要找的Bitmap
             bitmapSoftReference = mBitmapMap.get(bitmapPath);
         }
 
         if (bitmapSoftReference == null || bitmapSoftReference.get() == null) {
-            /** 生成Bitmap **/
+            // 生成Bitmap
             BitmapFactory.Options options = new BitmapFactory.Options();
             if (isInSample)
                 options.inSampleSize = BitmapUtil.getCompressionCoefficient(bitmapPath);
 
             bitmapSoftReference = new SoftReference<>(BitmapFactory.decodeFile(bitmapPath, options));
-            /** 保存到mBitmapMap **/
-            if (bitmapSoftReference.get() != null) {
+            // 保存到mBitmapMap
+            if (bitmapSoftReference.get() != null)
                 mBitmapMap.put(bitmapPath, bitmapSoftReference);
-            }
         }
+
         return bitmapSoftReference.get();
-
     }
-
 
 }

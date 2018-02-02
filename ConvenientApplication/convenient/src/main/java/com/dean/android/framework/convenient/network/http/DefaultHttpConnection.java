@@ -2,7 +2,7 @@ package com.dean.android.framework.convenient.network.http;
 
 import android.util.Log;
 
-import com.dean.android.framework.convenient.network.http.listener.HttpConnectionListener;
+import com.dean.android.framework.convenient.network.http.listener.OnHttpConnectionListener;
 import com.dean.android.framework.convenient.util.SetUtil;
 import com.lidroid.xutils.HttpUtils;
 import com.lidroid.xutils.exception.HttpException;
@@ -24,8 +24,19 @@ import java.net.HttpURLConnection;
 import java.net.ProtocolException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.Map;
+
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 /**
  * Http请求超类
@@ -44,14 +55,37 @@ public class DefaultHttpConnection {
     public static final String RESPONSE_TOKEN_LOSE_EFFICACY = "9004";
 
     /**
+     * 绕过HTTPS证书认证
+     */
+    private class NullHostNameVerifier implements HostnameVerifier {
+
+        @Override
+        public boolean verify(String hostname, SSLSession session) {
+            Log.i(DefaultHttpConnection.class.getSimpleName(), "Approving certificate for " + hostname);
+            return true;
+        }
+    }
+
+    /**
      * 发送默认配置的HttpGet请求
      *
      * @param basicURL
      * @param params
-     * @param httpConnectionListener
+     * @param onHttpConnectionListener
      */
-    protected void sendHttpGet(String basicURL, Map<String, String> headerParams, Object params, HttpConnectionListener httpConnectionListener) {
-        sendHttpGet(basicURL, headerParams, params, "utf-8", 5000, false, httpConnectionListener);
+    protected void sendHttpGet(String basicURL, Map<String, String> headerParams, Object params, OnHttpConnectionListener onHttpConnectionListener) {
+        sendHttpGet(basicURL, headerParams, params, "utf-8", 5000, false, onHttpConnectionListener);
+    }
+
+    /**
+     * 发送默认配置的HttpsGet请求
+     *
+     * @param basicURL
+     * @param params
+     * @param onHttpConnectionListener
+     */
+    protected void sendHttpsGet(String basicURL, Map<String, String> headerParams, Object params, OnHttpConnectionListener onHttpConnectionListener) {
+        sendHttpsGet(basicURL, headerParams, params, "utf-8", 5000, false, onHttpConnectionListener);
     }
 
     /**
@@ -63,20 +97,57 @@ public class DefaultHttpConnection {
      * @param encoding
      * @param connectTimeout
      * @param useCaches
-     * @param httpConnectionListener
+     * @param onHttpConnectionListener
      */
     protected void sendHttpGet(String basicURL, Map<String, String> headerParams, Object urlParams, String encoding, int connectTimeout, boolean useCaches,
-                               HttpConnectionListener httpConnectionListener) {
-        String urlParam = getHttpURL(basicURL, urlParams);
+                               OnHttpConnectionListener onHttpConnectionListener) {
+        sendGet(basicURL, headerParams, urlParams, encoding, connectTimeout, useCaches, onHttpConnectionListener);
+    }
 
+    /**
+     * 发送HttpsGet请求
+     *
+     * @param basicURL
+     * @param headerParams
+     * @param urlParams
+     * @param encoding
+     * @param connectTimeout
+     * @param useCaches
+     * @param onHttpConnectionListener
+     */
+    protected void sendHttpsGet(String basicURL, Map<String, String> headerParams, Object urlParams, String encoding, int connectTimeout, boolean useCaches,
+                                OnHttpConnectionListener onHttpConnectionListener) {
+        try {
+            setBypassHttpsAuthentication();
+            sendGet(basicURL, headerParams, urlParams, encoding, connectTimeout, useCaches, onHttpConnectionListener);
+        } catch (NoSuchAlgorithmException | KeyManagementException e) {
+            e.printStackTrace();
+            if (onHttpConnectionListener != null)
+                onHttpConnectionListener.onRequestError(-1);
+        }
+    }
+
+    /**
+     * 发送GET请求
+     *
+     * @param basicURL
+     * @param headerParams
+     * @param urlParams
+     * @param encoding
+     * @param connectTimeout
+     * @param useCaches
+     * @param onHttpConnectionListener
+     */
+    private void sendGet(String basicURL, Map<String, String> headerParams, Object urlParams, String encoding, int connectTimeout,
+                         boolean useCaches, OnHttpConnectionListener onHttpConnectionListener) {
         HttpURLConnection connection = null;
         InputStream inputStream = null;
         InputStreamReader inputStreamReader = null;
         BufferedReader reader = null;
 
         try {
+            String urlParam = getHttpURL(basicURL, urlParams);
             URL url = new URL(urlParam);
-
             connection = (HttpURLConnection) url.openConnection();
             setHttpURLConnectionConfig(connection, "GET", encoding, connectTimeout, useCaches, headerParams);
 
@@ -96,25 +167,25 @@ public class DefaultHttpConnection {
 
                 Log.d(ConvenientHttpConnection.class.getSimpleName(), "response is " + (responseBuilder.length() == 0 ? null : responseBuilder.toString()));
 
-                if (httpConnectionListener != null) {
+                if (onHttpConnectionListener != null) {
                     // 验证token
                     JSONObject response = new JSONObject(responseBuilder.toString());
                     String code = response.getString("code");
                     // 返回"token失效"应答
                     if (RESPONSE_TOKEN_LOSE_EFFICACY.equals(code)) {
-                        httpConnectionListener.onRequestTokenFailure();
+                        onHttpConnectionListener.onRequestTokenFailure();
                     }
                     // 正常返回应答
                     else
-                        httpConnectionListener.onRequestSuccess(responseBuilder.length() == 0 ? null : responseBuilder.toString());
+                        onHttpConnectionListener.onRequestSuccess(responseBuilder.length() == 0 ? null : responseBuilder.toString());
                 }
             } else {
-                if (httpConnectionListener != null)
-                    httpConnectionListener.onRequestError(responseCode);
+                if (onHttpConnectionListener != null)
+                    onHttpConnectionListener.onRequestError(responseCode);
             }
         } catch (IOException | JSONException e) {
-            if (httpConnectionListener != null)
-                httpConnectionListener.onRequestError(-1);
+            if (onHttpConnectionListener != null)
+                onHttpConnectionListener.onRequestError(-1);
         } finally {
             try {
                 if (reader != null)
@@ -137,11 +208,11 @@ public class DefaultHttpConnection {
      * @param basicURL
      * @param params
      * @param bodyParams
-     * @param httpConnectionListener
+     * @param onHttpConnectionListener
      */
     protected void sendHttpPost(String basicURL, Map<String, String> headerParams, Object params, Map<String, String> bodyParams,
-                                HttpConnectionListener httpConnectionListener) {
-        sendHttpPost(basicURL, headerParams, params, bodyParams, "utf-8", 5000, false, httpConnectionListener);
+                                OnHttpConnectionListener onHttpConnectionListener) {
+        sendHttpPost(basicURL, headerParams, params, bodyParams, "utf-8", 5000, false, onHttpConnectionListener);
     }
 
     /**
@@ -154,10 +225,51 @@ public class DefaultHttpConnection {
      * @param encoding
      * @param connectTimeout
      * @param useCaches
-     * @param httpConnectionListener
+     * @param onHttpConnectionListener
      */
     protected void sendHttpPost(String basicURL, Map<String, String> headerParams, Object urlParams, Object bodyParams, String encoding, int connectTimeout,
-                                boolean useCaches, HttpConnectionListener httpConnectionListener) {
+                                boolean useCaches, OnHttpConnectionListener onHttpConnectionListener) {
+        sendPost(basicURL, headerParams, urlParams, bodyParams, encoding, connectTimeout, useCaches, onHttpConnectionListener);
+    }
+
+    /**
+     * 发送HttpsPost请求
+     *
+     * @param basicURL
+     * @param headerParams
+     * @param urlParams
+     * @param bodyParams
+     * @param encoding
+     * @param connectTimeout
+     * @param useCaches
+     * @param onHttpConnectionListener
+     */
+    protected void sendHttpsPost(String basicURL, Map<String, String> headerParams, Object urlParams, Object bodyParams, String encoding, int connectTimeout,
+                                 boolean useCaches, OnHttpConnectionListener onHttpConnectionListener) {
+        try {
+            setBypassHttpsAuthentication();
+            sendPost(basicURL, headerParams, urlParams, bodyParams, encoding, connectTimeout, useCaches, onHttpConnectionListener);
+        } catch (NoSuchAlgorithmException | KeyManagementException e) {
+            e.printStackTrace();
+            if (onHttpConnectionListener != null)
+                onHttpConnectionListener.onRequestError(-1);
+        }
+    }
+
+    /**
+     * 发送Post请求
+     *
+     * @param basicURL
+     * @param headerParams
+     * @param urlParams
+     * @param bodyParams
+     * @param encoding
+     * @param connectTimeout
+     * @param useCaches
+     * @param onHttpConnectionListener
+     */
+    private void sendPost(String basicURL, Map<String, String> headerParams, Object urlParams, Object bodyParams, String encoding, int connectTimeout,
+                          boolean useCaches, OnHttpConnectionListener onHttpConnectionListener) {
         String urlParam = getHttpURL(basicURL, urlParams);
 
         HttpURLConnection connection = null;
@@ -219,25 +331,25 @@ public class DefaultHttpConnection {
 
                 Log.d(ConvenientHttpConnection.class.getSimpleName(), "response is " + (responseBuilder.length() == 0 ? null : responseBuilder.toString()));
 
-                if (httpConnectionListener != null) {
+                if (onHttpConnectionListener != null) {
                     // 验证token
                     JSONObject response = new JSONObject(responseBuilder.toString());
                     String code = response.getString("code");
                     // 返回"token失效"应答
                     if (RESPONSE_TOKEN_LOSE_EFFICACY.equals(code)) {
-                        httpConnectionListener.onRequestTokenFailure();
+                        onHttpConnectionListener.onRequestTokenFailure();
                     }
                     // 正常返回应答
                     else
-                        httpConnectionListener.onRequestSuccess(responseBuilder.length() == 0 ? null : responseBuilder.toString());
+                        onHttpConnectionListener.onRequestSuccess(responseBuilder.length() == 0 ? null : responseBuilder.toString());
                 }
             } else {
-                if (httpConnectionListener != null)
-                    httpConnectionListener.onRequestError(responseCode);
+                if (onHttpConnectionListener != null)
+                    onHttpConnectionListener.onRequestError(responseCode);
             }
         } catch (JSONException | IOException e) {
-            if (httpConnectionListener != null)
-                httpConnectionListener.onRequestError(-1);
+            if (onHttpConnectionListener != null)
+                onHttpConnectionListener.onRequestError(-1);
         } finally {
             try {
                 if (reader != null)
@@ -260,9 +372,9 @@ public class DefaultHttpConnection {
      * @param basicURL
      * @param urlParams
      * @param file
-     * @param httpConnectionListener
+     * @param onHttpConnectionListener
      */
-    public void sendFile(String basicURL, Object urlParams, File file, HttpConnectionListener httpConnectionListener) {
+    public void sendFile(String basicURL, Object urlParams, File file, OnHttpConnectionListener onHttpConnectionListener) {
         HttpUtils httpUtils = new HttpUtils();
         RequestParams params = new RequestParams();
 
@@ -278,22 +390,22 @@ public class DefaultHttpConnection {
                     String code = response.getString("code");
                     // 返回"token失效"应答
                     if (RESPONSE_TOKEN_LOSE_EFFICACY.equals(code)) {
-                        httpConnectionListener.onRequestTokenFailure();
+                        onHttpConnectionListener.onRequestTokenFailure();
                     }
                     // 正常返回应答
                     else
-                        httpConnectionListener.onRequestSuccess(responseInfo.result);
+                        onHttpConnectionListener.onRequestSuccess(responseInfo.result);
                 } catch (JSONException e) {
                     e.printStackTrace();
-                    if (httpConnectionListener != null)
-                        httpConnectionListener.onRequestError(-1);
+                    if (onHttpConnectionListener != null)
+                        onHttpConnectionListener.onRequestError(-1);
                 }
             }
 
             @Override
             public void onFailure(HttpException e, String s) {
-                if (httpConnectionListener != null)
-                    httpConnectionListener.onRequestError(e.getExceptionCode());
+                if (onHttpConnectionListener != null)
+                    onHttpConnectionListener.onRequestError(e.getExceptionCode());
             }
         });
     }
@@ -364,6 +476,31 @@ public class DefaultHttpConnection {
         }
 
         return builder.toString();
+    }
+
+    /**
+     * 设置HTTPS请求绕过证书验证
+     *
+     * @throws NoSuchAlgorithmException
+     * @throws KeyManagementException
+     */
+    public void setBypassHttpsAuthentication() throws NoSuchAlgorithmException, KeyManagementException {
+        TrustManager[] trustAllCerts = new TrustManager[]{new X509TrustManager() {
+            public X509Certificate[] getAcceptedIssuers() {
+                return null;
+            }
+
+            public void checkClientTrusted(X509Certificate[] certs, String authType) {
+            }
+
+            public void checkServerTrusted(X509Certificate[] certs, String authType) {
+            }
+        }};
+
+        HttpsURLConnection.setDefaultHostnameVerifier(new NullHostNameVerifier());
+        SSLContext sslContext = SSLContext.getInstance("TLS");
+        sslContext.init(null, trustAllCerts, new SecureRandom());
+        HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory());
     }
 
 }

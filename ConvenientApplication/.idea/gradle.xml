@@ -16,7 +16,6 @@
             <option value="$PROJECT_DIR$/gaodemaplibrary" />
             <option value="$PROJECT_DIR$/googlemap" />
             <option value="$PROJECT_DIR$/ui" />
-            <option value="$PROJECT_DIR$/umlib" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />

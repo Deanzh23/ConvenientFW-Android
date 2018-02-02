@@ -1,6 +1,6 @@
 package com.dean.android.framework.convenient.network.http;
 
-import com.dean.android.framework.convenient.network.http.listener.HttpConnectionListener;
+import com.dean.android.framework.convenient.network.http.listener.OnHttpConnectionListener;
 
 import java.io.File;
 import java.util.Map;
@@ -13,31 +13,55 @@ import java.util.Map;
 public class ConvenientHttpConnection extends DefaultHttpConnection {
 
     /**
-     * 发送（默认配置的） Http Get 请求
+     * 发送（默认配置的） HTTP Get 请求
      *
      * @param basicURL
      * @param params
-     * @param httpConnectionListener
+     * @param onHttpConnectionListener
      */
-    public void sendHttpGet(String basicURL, Map<String, String> headerParams, Object params, HttpConnectionListener httpConnectionListener) {
-        super.sendHttpGet(basicURL, headerParams, params, "utf-8", 5000, false, httpConnectionListener);
+    public void sendHttpGet(String basicURL, Map<String, String> headerParams, Object params, OnHttpConnectionListener onHttpConnectionListener) {
+        super.sendHttpGet(basicURL, headerParams, params, "utf-8", 5000, false, onHttpConnectionListener);
     }
 
     /**
-     * 发送（默认配置的） Http Post 请求
+     * 发送（默认配置的） HTTPS Get 请求
+     *
+     * @param basicURL
+     * @param params
+     * @param onHttpConnectionListener
+     */
+    public void sendHttpsGet(String basicURL, Map<String, String> headerParams, Object params, OnHttpConnectionListener onHttpConnectionListener) {
+        super.sendHttpsGet(basicURL, headerParams, params, "utf-8", 5000, false, onHttpConnectionListener);
+    }
+
+    /**
+     * 发送（默认配置的） HTTP Post 请求
      *
      * @param basicURL
      * @param params
      * @param bodyParams
-     * @param httpConnectionListener
+     * @param onHttpConnectionListener
      */
     public void sendHttpPost(String basicURL, Map<String, String> headerParams, Object params, Map<String, String> bodyParams,
-                             HttpConnectionListener httpConnectionListener) {
-        super.sendHttpPost(basicURL, headerParams, params, bodyParams, "utf-8", 5000, false, httpConnectionListener);
+                             OnHttpConnectionListener onHttpConnectionListener) {
+        super.sendHttpPost(basicURL, headerParams, params, bodyParams, "utf-8", 5000, false, onHttpConnectionListener);
     }
 
     /**
-     * 发送（默认配置的） Http Post 请求
+     * 发送（默认配置的） HTTPS Post 请求
+     *
+     * @param basicURL
+     * @param params
+     * @param bodyParams
+     * @param onHttpConnectionListener
+     */
+    public void sendHttpsPost(String basicURL, Map<String, String> headerParams, Object params, Map<String, String> bodyParams,
+                              OnHttpConnectionListener onHttpConnectionListener) {
+        super.sendHttpsPost(basicURL, headerParams, params, bodyParams, "utf-8", 5000, false, onHttpConnectionListener);
+    }
+
+    /**
+     * 发送（默认配置的） HTTP Post 请求
      * <p>
      * body参数是复杂的形式
      *
@@ -45,10 +69,10 @@ public class ConvenientHttpConnection extends DefaultHttpConnection {
      * @param headerParams
      * @param params
      * @param bodyParams
-     * @param httpConnectionListener
+     * @param onHttpConnectionListener
      */
-    public void sendHttpPost(String basicURL, Map<String, String> headerParams, Object params, String bodyParams, HttpConnectionListener httpConnectionListener) {
-        super.sendHttpPost(basicURL, headerParams, params, bodyParams, "utf-8", 5000, false, httpConnectionListener);
+    public void sendHttpPost(String basicURL, Map<String, String> headerParams, Object params, String bodyParams, OnHttpConnectionListener onHttpConnectionListener) {
+        super.sendHttpPost(basicURL, headerParams, params, bodyParams, "utf-8", 5000, false, onHttpConnectionListener);
     }
 
     /**
@@ -57,10 +81,10 @@ public class ConvenientHttpConnection extends DefaultHttpConnection {
      * @param basicURL
      * @param urlParams
      * @param file
-     * @param httpConnectionListener
+     * @param onHttpConnectionListener
      */
-    public void sendFile(String basicURL, Object urlParams, File file, HttpConnectionListener httpConnectionListener) {
-        super.sendFile(basicURL, urlParams, file, httpConnectionListener);
+    public void sendFile(String basicURL, Object urlParams, File file, OnHttpConnectionListener onHttpConnectionListener) {
+        super.sendFile(basicURL, urlParams, file, onHttpConnectionListener);
     }
 
 }

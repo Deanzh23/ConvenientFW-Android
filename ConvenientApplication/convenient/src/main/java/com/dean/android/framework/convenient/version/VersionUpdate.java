@@ -6,7 +6,7 @@ import android.util.Log;
 
 import com.dean.android.framework.convenient.network.NetworkUtil;
 import com.dean.android.framework.convenient.network.http.ConvenientHttpConnection;
-import com.dean.android.framework.convenient.network.http.listener.HttpConnectionListener;
+import com.dean.android.framework.convenient.network.http.listener.OnHttpConnectionListener;
 import com.dean.android.framework.convenient.version.listener.OnCheckVersionListener;
 import com.dean.android.framework.convenient.version.util.VersionUtil;
 
@@ -84,7 +84,7 @@ public class VersionUpdate {
             onCheckVersionListener.onCheck(false, null);
         } else {
             ConvenientHttpConnection connection = new ConvenientHttpConnection();
-            connection.sendHttpGet(checkUpdateURL, null, null, new HttpConnectionListener() {
+            connection.sendHttpGet(checkUpdateURL, null, null, new OnHttpConnectionListener() {
                 @Override
                 public void onSuccess(String response) {
                     try {

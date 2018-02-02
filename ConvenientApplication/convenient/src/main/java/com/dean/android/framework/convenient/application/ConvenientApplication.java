@@ -17,7 +17,6 @@ import com.dean.android.framework.convenient.format.MathFormatUtils;
 import com.dean.android.framework.convenient.toast.ToastUtil;
 import com.dean.android.framework.convenient.util.SetUtil;
 import com.dean.android.framework.convenient.version.VersionUpdate;
-import com.umeng.commonsdk.UMConfigure;
 
 import java.io.File;
 import java.util.HashMap;
@@ -56,9 +55,6 @@ public abstract class ConvenientApplication extends Application {
         // 解决URI问题
         StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
         StrictMode.setVmPolicy(builder.build());
-
-        // 初始化"友盟统计"
-        UMConfigure.init(this, UMConfigure.DEVICE_TYPE_PHONE, "");
     }
 
     /**
@@ -69,7 +65,7 @@ public abstract class ConvenientApplication extends Application {
         versionUpdate.setCheckUpdateURL(checkVersionUrl());
 
         new Thread(() -> {
-            /** 抽象方法，开发人员根据业务自己实现初始化加载的配置和数据 **/
+            // 抽象方法，开发人员根据业务自己实现初始化加载的配置和数据
             initConfigAndData();
 
             versionUpdate.checkUpdate((hasVersionUpdate, updateInfo) -> {
@@ -169,9 +165,9 @@ public abstract class ConvenientApplication extends Application {
      * 设置app初始化完成
      */
     private void appInitFinish() {
-        /** 设置app已完成初始化标记 **/
+        // 设置app已完成初始化标记
         isAppInitFinish = true;
-        /** 发送app初始化完成广播 **/
+        // 发送app初始化完成广播
         sendBroadcast(new Intent(ACTION_APP_INIT_FINISH));
     }
 

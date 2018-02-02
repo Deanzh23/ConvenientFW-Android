@@ -9,7 +9,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 
 /**
@@ -42,9 +41,9 @@ public class BitmapDownloadRunnable implements Runnable {
         if (httpURLConnection == null)
             return;
 
-        /** 连接时长 1分钟 **/
+        // 连接时长 1分钟
         httpURLConnection.setConnectTimeout(1000 * 60);
-        /** 其它配置信息 **/
+        // 其它配置信息
         httpURLConnection.setRequestProperty("Accept-Language", "zh-CH");
         httpURLConnection.setRequestProperty("Charset", "UTF-8");
         httpURLConnection.setRequestProperty("Connection", "Keep-Alive");
@@ -57,14 +56,14 @@ public class BitmapDownloadRunnable implements Runnable {
         try {
             URL url = new URL(mURL);
             httpURLConnection = (HttpURLConnection) url.openConnection();
-            /** 配置 HttpURLConnection **/
+            // 配置 HttpURLConnection
             configConnection(httpURLConnection);
-            /** 获取服务器中图片的输入流 **/
+            // 获取服务器中图片的输入流
             inputStream = httpURLConnection.getInputStream();
 
             int fileSize = httpURLConnection.getContentLength();
 
-            /** 输入流转输出流 写入文件 **/
+            // 输入流转输出流 写入文件
             writeToFile(inputStream, fileSize);
 
             mActivity.runOnUiThread(new Runnable() {
@@ -73,12 +72,10 @@ public class BitmapDownloadRunnable implements Runnable {
                     mBitmapDownloadListener.success();
                 }
             });
-        } catch (final MalformedURLException e) {
-            throwErrorToUiThread(e.getMessage());
         } catch (IOException e) {
             throwErrorToUiThread(e.getMessage());
         } finally {
-            /** 关闭连接 **/
+            // 关闭连接
             try {
                 if (inputStream != null)
                     inputStream.close();
@@ -91,12 +88,7 @@ public class BitmapDownloadRunnable implements Runnable {
     }
 
     private void throwErrorToUiThread(final String error) {
-        mActivity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mBitmapDownloadListener.error(error);
-            }
-        });
+        mActivity.runOnUiThread(() -> mBitmapDownloadListener.error(error));
     }
 
     /**
@@ -126,17 +118,11 @@ public class BitmapDownloadRunnable implements Runnable {
             fileOutputStream.write(date, 0, len);
 
             final int finalLen = len;
-            mActivity.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    mBitmapDownloadListener.progress(lenCount[0] += finalLen, fileSize);
-                }
-            });
+            mActivity.runOnUiThread(() -> mBitmapDownloadListener.progress(lenCount[0] += finalLen, fileSize));
         }
 
         try {
-            if (fileOutputStream != null)
-                fileOutputStream.close();
+            fileOutputStream.close();
         } catch (IOException e) {
             e.printStackTrace();
         }

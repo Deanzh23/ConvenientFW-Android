@@ -14,7 +14,6 @@ import com.dean.android.framework.convenient.keyboard.KeyboardUtil;
 import com.dean.android.framework.convenient.permission.annotations.util.PermissionAnnotationsUtil;
 import com.dean.android.framework.convenient.permission.util.PermissionsUtil;
 import com.dean.android.framework.convenient.view.util.BindingViewController;
-import com.umeng.analytics.MobclickAgent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -65,17 +64,6 @@ public class ConvenientActivity<T extends ViewDataBinding> extends AppCompatActi
 
         // 收起软键盘
         KeyboardUtil.hideSoftKeyboard(this);
-        // 友盟Session统计
-        MobclickAgent.onPageStart(getClass().getSimpleName());
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-
-        // 友盟Session统计
-        MobclickAgent.onPageEnd(getClass().getSimpleName());
-        MobclickAgent.onPause(this);
     }
 
     @Override

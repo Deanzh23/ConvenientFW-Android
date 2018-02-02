@@ -5,7 +5,7 @@ package com.dean.android.framework.convenient.network.http.listener;
  * <p>
  * Created by Dean on 16/8/9.
  */
-public abstract class HttpConnectionListener {
+public abstract class OnHttpConnectionListener {
 
     /**
      * 请求成功（返回状态码200）

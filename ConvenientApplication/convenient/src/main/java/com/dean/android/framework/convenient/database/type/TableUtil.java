@@ -14,6 +14,8 @@ import java.util.Date;
 import java.util.List;
 
 /**
+ * 数据库表 工具类
+ * <p>
  * Created by Dean on 16/5/24.
  */
 public class TableUtil {
@@ -56,11 +58,7 @@ public class TableUtil {
             Log.d(TableUtil.class.getSimpleName(), "[insert]--->column is " + columnName + " : value is " + result);
 
             return getTableTypeValue(result, field.getType());
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        } catch (NoSuchMethodException e) {
+        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             e.printStackTrace();
         }
 
@@ -74,7 +72,7 @@ public class TableUtil {
      * @param typeClass
      * @return
      */
-    public static Object getTableTypeValue(Object object, Class typeClass) {
+    private static Object getTableTypeValue(Object object, Class typeClass) {
         String typeName = typeClass.getSimpleName().toLowerCase();
 
         if ("boolean".equals(typeName))
@@ -95,10 +93,7 @@ public class TableUtil {
      * @return
      */
     public static Object getTableTypeValue(Object object) {
-        if (object == null)
-            return null;
-        else
-            return getTableTypeValue(object, object.getClass());
+        return object != null ? getTableTypeValue(object, object.getClass()) : null;
     }
 
     /**
@@ -109,7 +104,7 @@ public class TableUtil {
      * @return
      */
     public static <T> List<T> generateOrmObject(Class ormClass, Cursor cursor) {
-        /** 没有查询到记录 **/
+        // 没有查询到记录
         if (cursor == null || cursor.getCount() <= 0)
             return null;
 
@@ -118,10 +113,10 @@ public class TableUtil {
         String[] columnNames = cursor.getColumnNames();
 
         while (cursor.moveToNext()) {
-            /** 生成实例对象 **/
+            // 生成实例对象
             Object object = ObjectUtils.instanceFromClass(ormClass);
 
-            /** 遍历表结构，为实例对象注入对应的表字段值 **/
+            // 遍历表结构，为实例对象注入对应的表字段值
             for (String columnName : columnNames) {
                 int columnIndex = cursor.getColumnIndex(columnName);
 
@@ -156,13 +151,7 @@ public class TableUtil {
                     else if ("date".equals(typeName))
                         setMethod.invoke(object, new Date(cursor.getLong(columnIndex)));
 
-                } catch (NoSuchFieldException e) {
-                    e.printStackTrace();
-                } catch (InvocationTargetException e) {
-                    e.printStackTrace();
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                } catch (NoSuchMethodException e) {
+                } catch (NoSuchFieldException | InvocationTargetException | IllegalAccessException | NoSuchMethodException e) {
                     e.printStackTrace();
                 }
             }

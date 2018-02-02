@@ -99,7 +99,7 @@ public class DatabaseFactory {
         StringBuilder createTableSQLBuilder = new StringBuilder();
         createTableSQLBuilder.append("CREATE TABLE IF NOT EXISTS");
 
-        /** 表名 **/
+        // 表名
         createTableSQLBuilder.append(" " + TableUtil.getTableName(ormClass) + " (");
 
         Field[] fields = getFields(ormClass);
@@ -108,17 +108,17 @@ public class DatabaseFactory {
         if (length == 0)
             return;
 
-        /** 字段 **/
+        // 字段
         for (Field field : fields) {
             if (field.getAnnotation(PrimaryKey.class) != null || field.getAnnotation(Column.class) != null) {
                 boolean isPrimaryKey = field.getAnnotation(PrimaryKey.class) != null;
 
-                createTableSQLBuilder.append(" " + field.getName() + " " + TableUtil.getTableType(field.getType()) + (isPrimaryKey ? (" " + TableUtil
-                        .COLUMN_NOT_NULL) : " ") + " ,");
+                createTableSQLBuilder.append(" " + field.getName() + " "
+                        + TableUtil.getTableType(field.getType()) + (isPrimaryKey ? (" " + TableUtil.COLUMN_NOT_NULL) : " ") + " ,");
             }
         }
 
-        /** 主键 **/
+        // 主键
         for (Field field : fields) {
             PrimaryKey primaryKeyAnnotation = field.getAnnotation(PrimaryKey.class);
 
@@ -157,7 +157,7 @@ public class DatabaseFactory {
         StringBuilder selectSQLBuilder = new StringBuilder();
         selectSQLBuilder.append("SELECT * FROM");
 
-        /** 表名 **/
+        // 表名
         selectSQLBuilder.append(" " + TableUtil.getTableName(ormClass) + " WHERE");
 
         Field[] fields = getFields(ormClass);
@@ -165,7 +165,7 @@ public class DatabaseFactory {
         if (fields.length == 0)
             return null;
 
-        /** 主键 **/
+        // 主键
         for (Field field : fields) {
             PrimaryKey primaryKeyAnnotation = field.getAnnotation(PrimaryKey.class);
 
@@ -178,15 +178,15 @@ public class DatabaseFactory {
                 selectSQLBuilder.append(" AND " + field.getName() + " = " + TableUtil.getColumnValue(ormObject, field));
         }
 
-        /** 查询 **/
+        // 查询
         Log.d(DatabaseFactory.class.getName(), selectSQLBuilder.toString());
         Cursor cursor = sFrameworkDatabaseHelper.getReadableDatabase().rawQuery(selectSQLBuilder.toString(), null);
 
-        /** 构造实例对象 **/
+        // 构造实例对象
         List<T> dataList = TableUtil.generateOrmObject(ormObject.getClass(), cursor);
         cursor.close();
 
-        /** 改变原有实例对象 **/
+        // 改变原有实例对象
         if (isChangeOriginalObject) {
             if (dataList != null && dataList.size() > 0)
                 try {
@@ -199,7 +199,7 @@ public class DatabaseFactory {
                 return null;
         }
 
-        /** 不改变原有实例对象 **/
+        // 不改变原有实例对象
         return ormObject;
     }
 
@@ -214,7 +214,7 @@ public class DatabaseFactory {
         StringBuilder selectSQLBuilder = new StringBuilder();
         selectSQLBuilder.append("SELECT * FROM");
 
-        /** 表名 **/
+        // 表名
         selectSQLBuilder.append(" " + TableUtil.getTableName(ormClass));
 
         if (selector != null && selector.getSQL() != null) {
@@ -225,7 +225,7 @@ public class DatabaseFactory {
         Cursor cursor;
 
         try {
-            /** 查询 **/
+            // 查询
             Log.d(DatabaseFactory.class.getName(), selectSQLBuilder.toString());
             cursor = sFrameworkDatabaseHelper.getReadableDatabase().rawQuery(selectSQLBuilder.toString(), null);
         } catch (Exception e) {
@@ -236,7 +236,7 @@ public class DatabaseFactory {
             cursor = sFrameworkDatabaseHelper.getReadableDatabase().rawQuery(selectSQLBuilder.toString(), null);
         }
 
-        /** 构造实例对象 **/
+        // 构造实例对象
         List<T> dataList = TableUtil.generateOrmObject(ormClass, cursor);
         cursor.close();
 
@@ -273,11 +273,11 @@ public class DatabaseFactory {
         }
 
         StringBuilder insertSQLBuilder = new StringBuilder();
-        /** 表名 **/
+        // 表名
         insertSQLBuilder.append("INSERT INTO " + TableUtil.getTableName(ormClass) + " (");
 
         int columnCount = columnList.size();
-        /** 字段 **/
+        // 字段
         for (int i = 0; i < columnCount; i++) {
             String column = columnList.get(i);
             insertSQLBuilder.append(" " + column);
@@ -288,7 +288,7 @@ public class DatabaseFactory {
 
         insertSQLBuilder.append(" ) VALUES ( ");
 
-        /** 字段赋值 **/
+        // 字段赋值
         for (int i = 0; i < columnCount; i++) {
             Object value = columnValueList.get(i);
             insertSQLBuilder.append(value);
@@ -318,9 +318,9 @@ public class DatabaseFactory {
      * @param ormObject
      */
     public void update(Object ormObject) {
-        /** 删除原有记录 **/
+        // 删除原有记录
         delete(ormObject);
-        /** 插入新记录 **/
+        // 插入新记录
         insert(ormObject);
     }
 
@@ -336,7 +336,7 @@ public class DatabaseFactory {
         StringBuilder deleteSQLBuilder = new StringBuilder();
         deleteSQLBuilder.append("DELETE FROM");
 
-        /** 表名 **/
+        // 表名
         deleteSQLBuilder.append(" " + TableUtil.getTableName(ormClass) + " WHERE");
 
         Field[] fields = getFields(ormClass);
@@ -344,7 +344,7 @@ public class DatabaseFactory {
         if (fields.length == 0)
             return;
 
-        /** 字段 **/
+        // 字段
         for (Field field : fields) {
             PrimaryKey primaryKeyAnnotation = field.getAnnotation(PrimaryKey.class);
 
@@ -357,7 +357,7 @@ public class DatabaseFactory {
                 deleteSQLBuilder.append(" AND " + field.getName() + " = " + TableUtil.getColumnValue(ormObject, field));
         }
 
-        /** 删除 **/
+        // 删除
         Log.d(DatabaseFactory.class.getName(), deleteSQLBuilder.toString());
         sFrameworkDatabaseHelper.getWritableDatabase().execSQL(deleteSQLBuilder.toString());
     }
@@ -371,7 +371,7 @@ public class DatabaseFactory {
         StringBuilder deleteSQLBuilder = new StringBuilder();
         deleteSQLBuilder.append("DELETE FROM");
 
-        /** 表名 **/
+        // 表名
         deleteSQLBuilder.append(" " + TableUtil.getTableName(ormClass));
 
         if (selector != null && selector.getSQL() != null) {
@@ -379,7 +379,7 @@ public class DatabaseFactory {
             deleteSQLBuilder.append(selector.getSQL());
         }
 
-        /** 删除 **/
+        // 删除
         Log.d(DatabaseFactory.class.getName(), deleteSQLBuilder.toString());
         sFrameworkDatabaseHelper.getWritableDatabase().execSQL(deleteSQLBuilder.toString());
     }
@@ -458,15 +458,17 @@ public class DatabaseFactory {
         builder.append("name = '").append(strTableName).append("' AND sql LIKE '%").append(strFieldName).append("%'");
         Cursor cursor = null;
         try {
-            cursor = sFrameworkDatabaseHelper.getWritableDatabase().query("sqlite_master", null, builder.toString(), null, null, null, null);
+            cursor = sFrameworkDatabaseHelper.getWritableDatabase().query("sqlite_master", null, builder.toString(), null, null,
+                    null, null);
+
             return cursor.getCount() > 0;
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (cursor != null) {
+            if (cursor != null)
                 cursor.close();
-            }
         }
+
         return false;
     }
 

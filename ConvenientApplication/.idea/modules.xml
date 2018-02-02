@@ -10,7 +10,6 @@
       <module fileurl="file://$PROJECT_DIR$/gaodemaplibrary/gaodemaplibrary.iml" filepath="$PROJECT_DIR$/gaodemaplibrary/gaodemaplibrary.iml" />
       <module fileurl="file://$PROJECT_DIR$/googlemap/googlemap.iml" filepath="$PROJECT_DIR$/googlemap/googlemap.iml" />
       <module fileurl="file://$PROJECT_DIR$/ui/ui.iml" filepath="$PROJECT_DIR$/ui/ui.iml" />
-      <module fileurl="file://$PROJECT_DIR$/umlib/umlib.iml" filepath="$PROJECT_DIR$/umlib/umlib.iml" />
     </modules>
   </component>
 </project>

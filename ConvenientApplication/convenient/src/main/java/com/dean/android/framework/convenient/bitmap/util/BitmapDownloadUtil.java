@@ -34,34 +34,19 @@ public class BitmapDownloadUtil {
      * @param bitmapDownloadListener 下载状态监听器
      */
     public static void download(Activity activity, String url, String localPath, String pictureName, final BitmapDownloadListener bitmapDownloadListener) {
-        /** URL 可用性检查 **/
+        // URL 可用性检查
         if (TextUtils.isEmpty(url)) {
-            activity.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    bitmapDownloadListener.error("download address is \"\" or NULL");
-                }
-            });
+            activity.runOnUiThread(() -> bitmapDownloadListener.error("download address is \"\" or NULL"));
             return;
         }
-        /** URL重复性检查 **/
+        // URL重复性检查
         if (mDownloadUrlSet.contains(url)) {
-            activity.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    bitmapDownloadListener.error("this picture is downloading...");
-                }
-            });
+            activity.runOnUiThread(() -> bitmapDownloadListener.error("this picture is downloading..."));
             return;
         }
 
-        /** 开始下载 **/
-        activity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                bitmapDownloadListener.start();
-            }
-        });
+        // 开始下载
+        activity.runOnUiThread(() -> bitmapDownloadListener.start());
         new Thread(new BitmapDownloadRunnable(activity, url, localPath, pictureName, bitmapDownloadListener)).start();
     }
 

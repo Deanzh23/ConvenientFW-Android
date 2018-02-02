@@ -1,6 +1,5 @@
 package com.dean.android.framework.convenient.fragment;
 
-import android.app.Activity;
 import android.databinding.ViewDataBinding;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -11,7 +10,6 @@ import android.view.ViewGroup;
 
 import com.dean.android.framework.convenient.keyboard.KeyboardUtil;
 import com.dean.android.framework.convenient.view.util.BindingViewController;
-import com.umeng.analytics.MobclickAgent;
 
 /**
  * 架构超类Fragment
@@ -20,20 +18,12 @@ import com.umeng.analytics.MobclickAgent;
  */
 public class ConvenientFragment<T extends ViewDataBinding> extends Fragment {
 
-    protected Activity activity;
     protected T viewDataBinding;
-
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-
-        this.activity = activity;
-    }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        /** 设置DataBinding相关配置 **/
+        // 设置DataBinding相关配置
         viewDataBinding = BindingViewController.inject(this, viewDataBinding);
 
         return viewDataBinding.getRoot();
@@ -44,18 +34,14 @@ public class ConvenientFragment<T extends ViewDataBinding> extends Fragment {
         super.onResume();
 
         // 收起软键盘
-        if (activity != null)
-            KeyboardUtil.hideSoftKeyboard(activity);
-
-        // 友盟Session统计
-        MobclickAgent.onPageStart(getClass().getSimpleName());
+        try {
+            KeyboardUtil.hideSoftKeyboard(getActivity());
+        } catch (Exception e) {
+        }
     }
 
     @Override
     public void onPause() {
         super.onPause();
-
-        // 友盟Session统计
-        MobclickAgent.onPageEnd(getClass().getSimpleName());
     }
 }

@@ -29,14 +29,11 @@ public class AnimatorUtils {
             return;
 
         ValueAnimator heightAnimator = ValueAnimator.ofInt(0, viewHeight);
-        heightAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                int height = Integer.valueOf(animation.getAnimatedValue() + "");
-                ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
-                layoutParams.height = height;
-                view.setLayoutParams(layoutParams);
-            }
+        heightAnimator.addUpdateListener(animation -> {
+            int height = Integer.valueOf(animation.getAnimatedValue() + "");
+            ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
+            layoutParams.height = height;
+            view.setLayoutParams(layoutParams);
         });
         heightAnimator.addListener(new Animator.AnimatorListener() {
             @Override
@@ -85,15 +82,12 @@ public class AnimatorUtils {
             return;
 
         ValueAnimator heightAnimator = ValueAnimator.ofInt(view.getHeight(), 0);
-        heightAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                int height = (int) animation.getAnimatedValue();
+        heightAnimator.addUpdateListener(animation -> {
+            int height = (int) animation.getAnimatedValue();
 
-                ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
-                layoutParams.height = height;
-                view.setLayoutParams(layoutParams);
-            }
+            ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
+            layoutParams.height = height;
+            view.setLayoutParams(layoutParams);
         });
         heightAnimator.addListener(new Animator.AnimatorListener() {
             @Override
@@ -143,18 +137,15 @@ public class AnimatorUtils {
         int initTopMargin = ((ViewGroup.MarginLayoutParams) view.getLayoutParams()).topMargin;
 
         ValueAnimator topMarginAnimator = ValueAnimator.ofInt(initTopMargin, endTopMargin);
-        topMarginAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                try {
-                    int updateTopMargin = (int) animation.getAnimatedValue();
+        topMarginAnimator.addUpdateListener(animation -> {
+            try {
+                int updateTopMargin = (int) animation.getAnimatedValue();
 
-                    RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) view.getLayoutParams();
-                    layoutParams.setMargins(0, updateTopMargin, 0, 0);
-                    view.setLayoutParams(layoutParams);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) view.getLayoutParams();
+                layoutParams.setMargins(0, updateTopMargin, 0, 0);
+                view.setLayoutParams(layoutParams);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         });
 
@@ -203,18 +194,15 @@ public class AnimatorUtils {
         int initTopMargin = ((ViewGroup.MarginLayoutParams) view.getLayoutParams()).topMargin;
 
         ValueAnimator topMarginAnimator = ValueAnimator.ofInt(initTopMargin, -1 * view.getHeight());
-        topMarginAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                try {
-                    int updateTopMargin = (int) animation.getAnimatedValue();
+        topMarginAnimator.addUpdateListener(animation -> {
+            try {
+                int updateTopMargin = (int) animation.getAnimatedValue();
 
-                    RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) view.getLayoutParams();
-                    layoutParams.setMargins(0, updateTopMargin, 0, 0);
-                    view.setLayoutParams(layoutParams);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) view.getLayoutParams();
+                layoutParams.setMargins(0, updateTopMargin, 0, 0);
+                view.setLayoutParams(layoutParams);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         });
 

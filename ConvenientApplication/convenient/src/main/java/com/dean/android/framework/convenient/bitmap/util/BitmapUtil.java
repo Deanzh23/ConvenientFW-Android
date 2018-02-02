@@ -206,11 +206,9 @@ public class BitmapUtil {
                 path = Uri.decode(path);
                 ContentResolver cr = activity.getContentResolver();
                 StringBuffer buff = new StringBuffer();
-                buff.append("(").append(MediaStore.Images.ImageColumns.DATA).append("=")
-                        .append("'" + path + "'").append(")");
-                Cursor cur = cr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                        new String[]{MediaStore.Images.ImageColumns._ID},
-                        buff.toString(), null, null);
+                buff.append("(").append(MediaStore.Images.ImageColumns.DATA).append("=").append("'" + path + "'").append(")");
+                Cursor cur = cr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, new String[]{MediaStore.Images.ImageColumns._ID}, buff.toString(),
+                        null, null);
                 int index = 0;
                 for (cur.moveToFirst(); !cur.isAfterLast(); cur.moveToNext()) {
                     index = cur.getColumnIndex(MediaStore.Images.ImageColumns._ID);
@@ -220,12 +218,9 @@ public class BitmapUtil {
                 if (index == 0) {
                     // do nothing
                 } else {
-                    Uri uri_temp = Uri
-                            .parse("content://media/external/images/media/"
-                                    + index);
-                    if (uri_temp != null) {
+                    Uri uri_temp = Uri.parse("content://media/external/images/media/" + index);
+                    if (uri_temp != null)
                         uri = uri_temp;
-                    }
                 }
             }
         }
@@ -279,30 +274,24 @@ public class BitmapUtil {
      */
     private static synchronized void setBitmap2View(final Activity activity, final ImageView imageView, final String bitmapPath, final boolean isFromCache,
                                                     Integer defaultPicResourceId, final boolean isSetOnBackground) {
-        /** 设置图片未加载出来前显示的默认图片 **/
+        // 设置图片未加载出来前显示的默认图片
         if (defaultPicResourceId != null)
             imageView.setImageResource(defaultPicResourceId);
 
-        /** 异步加载图片 **/
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                /** 通过 BitmapCache 生成 Bitmap **/
-                try {
-                    final Bitmap bitmap = getBitmap(bitmapPath, true, isFromCache);
-                    /** 回到UI线程中设置图片显示 **/
-                    activity.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            /** 打完收工 **/
-                            if (!isSetOnBackground)
-                                imageView.setImageBitmap(bitmap);
-                            else
-                                imageView.setBackground(new BitmapDrawable(bitmap));
-                        }
-                    });
-                } catch (FileNotFoundException e) {
-                }
+        // 异步加载图片
+        new Thread(() -> {
+            // 通过 BitmapCache 生成 Bitmap
+            try {
+                final Bitmap bitmap = getBitmap(bitmapPath, true, isFromCache);
+                // 回到UI线程中设置图片显示
+                activity.runOnUiThread(() -> {
+                    // 打完收工
+                    if (!isSetOnBackground)
+                        imageView.setImageBitmap(bitmap);
+                    else
+                        imageView.setBackground(new BitmapDrawable(bitmap));
+                });
+            } catch (FileNotFoundException e) {
             }
         }).start();
     }
@@ -316,8 +305,8 @@ public class BitmapUtil {
      * @param isFromCache          是否从缓存读取
      * @param defaultPicResourceId 图片未加载出来前显示的默认图片资源ID
      */
-    public static synchronized void setBitmap2ViewOnBackground(final Activity activity, final ImageView imageView, final String bitmapPath,
-                                                               final boolean isFromCache, Integer defaultPicResourceId) {
+    public static synchronized void setBitmap2ViewOnBackground(final Activity activity, final ImageView imageView, final String bitmapPath, final boolean isFromCache,
+                                                               Integer defaultPicResourceId) {
         setBitmap2View(activity, imageView, bitmapPath, isFromCache, defaultPicResourceId, true);
     }
 
@@ -330,8 +319,8 @@ public class BitmapUtil {
      * @param isFromCache          是否从缓存读取
      * @param defaultPicResourceId 图片未加载出来前显示的默认图片资源ID
      */
-    public static synchronized void setBitmap2ViewOnImageBitmap(final Activity activity, final ImageView imageView, final String bitmapPath,
-                                                                final boolean isFromCache, Integer defaultPicResourceId) {
+    public static synchronized void setBitmap2ViewOnImageBitmap(final Activity activity, final ImageView imageView, final String bitmapPath, final boolean isFromCache,
+                                                                Integer defaultPicResourceId) {
         setBitmap2View(activity, imageView, bitmapPath, isFromCache, defaultPicResourceId, false);
     }
 
@@ -360,52 +349,33 @@ public class BitmapUtil {
      * @param pictureWriteListener 写入状态监听器
      * @throws HasNoPermissionException 没有SD卡写入权限异常
      */
-    public static void saveBitmapToSDCard(final Activity activity, final Bitmap bitmap, final String bitmapName, final String sdCardPath, final PictureWriteListener
-            pictureWriteListener) throws HasNoPermissionException {
-
-        /** 检查SD卡写入权限 **/
+    public static void saveBitmapToSDCard(final Activity activity, final Bitmap bitmap, final String bitmapName, final String sdCardPath,
+                                          final PictureWriteListener pictureWriteListener) throws HasNoPermissionException {
+        // 检查SD卡写入权限
         if (!PermissionsUtil.checkPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
             throw new HasNoPermissionException();
         }
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                File directory = new File(sdCardPath);
-                File bitmapFile = new File(directory, bitmapName);
-                /** 创建路径 **/
-                if (!directory.exists())
-                    directory.mkdirs();
-                /** 替换文件 **/
-                if (bitmapFile.exists())
-                    bitmapFile.delete();
+        new Thread(() -> {
+            File directory = new File(sdCardPath);
+            File bitmapFile = new File(directory, bitmapName);
+            // 创建路径
+            if (!directory.exists())
+                directory.mkdirs();
+            // 替换文件
+            if (bitmapFile.exists())
+                bitmapFile.delete();
 
+            if (pictureWriteListener != null)
+                activity.runOnUiThread(() -> pictureWriteListener.writeStart());
+            try {
+                writeToSDCard(bitmap, bitmapFile);
+            } catch (Exception e) {
                 if (pictureWriteListener != null)
-                    activity.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            pictureWriteListener.writeStart();
-                        }
-                    });
-                try {
-                    writeToSDCard(bitmap, bitmapFile);
-                } catch (Exception e) {
-                    if (pictureWriteListener != null)
-                        activity.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                pictureWriteListener.writeError();
-                            }
-                        });
-                }
-                if (pictureWriteListener != null)
-                    activity.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            pictureWriteListener.writeEnd();
-                        }
-                    });
+                    activity.runOnUiThread(() -> pictureWriteListener.writeError());
             }
+            if (pictureWriteListener != null)
+                activity.runOnUiThread(() -> pictureWriteListener.writeEnd());
         }).start();
     }
 
@@ -440,8 +410,7 @@ public class BitmapUtil {
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, fileOutputStream);
         fileOutputStream.flush();
         try {
-            if (fileOutputStream != null)
-                fileOutputStream.close();
+            fileOutputStream.close();
         } catch (IOException e) {
             e.printStackTrace();
         }

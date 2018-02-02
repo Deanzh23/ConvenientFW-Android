@@ -90,25 +90,20 @@ public abstract class ConvenientMainActivity<T extends ViewDataBinding> extends 
     protected void onResume() {
         super.onResume();
 
-        /** 检查app初始化配置和数据是否已经完成（延迟1s执行） **/
-        mHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                checkAppInitProgress();
-            }
-        }, 1000);
+        // 检查app初始化配置和数据是否已经完成（延迟1s执行）
+        mHandler.postDelayed(() -> checkAppInitProgress(), 1000);
     }
 
     /**
      * app初始化进度
      */
     private void checkAppInitProgress() {
-        /** 如果app已经初始化完成，则直接进入下一界面 **/
+        // 如果app已经初始化完成，则直接进入下一界面
         if (ConvenientApplication.isAppInitFinish) {
             if (mIsAutoJump && !checkVersionUpdateFinish)
                 aboutCheckVersionUpdate();
         }
-        /** app没有初始化完成，注册广播监听器，监听初始化完成广播 **/
+        // app没有初始化完成，注册广播监听器，监听初始化完成广播
         else
             registerAppInitFinishBroadcastReceiver();
     }

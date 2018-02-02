@@ -1,1 +1,1 @@
-include ':app', ':convenient', ':convenientlibrary', ':gaodemap', ':gaodemaplibrary', ':ui', ':googlemap', ':umlib'
+include ':app', ':convenient', ':convenientlibrary', ':gaodemap', ':gaodemaplibrary', ':ui', ':googlemap'
